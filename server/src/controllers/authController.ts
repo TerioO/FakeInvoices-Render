@@ -9,7 +9,7 @@ import { createFakeInvoices } from "../faker/createFakeInvoices";
 
 const ACCESS_TOKEN_EXPIRES: string = "1d";
 const REFRESH_TOKEN_EXPIRES: string = "2d";
-const COOKIE_MAX_AGE: number = 1000 * 60 * 60 * 24;
+const COOKIE_MAX_AGE: number = 1000 * 60 * 60 * 48;
 
 export interface AccessTokenPayload {
     UserInfo: ResLocals
