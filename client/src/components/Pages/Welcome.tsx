@@ -28,7 +28,10 @@ export default function Welcome() {
                     User authentication with assigned roles: USER, ADMIN, OWNER
                 </li>
                 <li>Automatic session refresh</li>
-                <li>Remember me function for persisting login state</li>
+                <li>
+                    Remember me function for persisting login state (You need to
+                    allow 3rd party cookies for this to work)
+                </li>
                 <li>Protected routes by user role/auth state</li>
                 <li>Each new user will have a few fake invoices created</li>
                 <li>
