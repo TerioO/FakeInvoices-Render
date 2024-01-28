@@ -1,0 +1,31 @@
+@import "./ct.scss";
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+html, body {
+    padding: 0;
+    margin: 0;
+}
+
+html {
+    font-family: $th-font-family;
+    font-size: 16px;
+}
+
+input, button, select, option, textarea {
+    font-family: $th-font-family;
+    font-size: 16px;
+}
+
+a, button {
+    cursor: pointer;
+    font-family: inherit;
+    font-size: inherit;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}

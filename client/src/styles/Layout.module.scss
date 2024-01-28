@@ -1,0 +1,85 @@
+@import "./ct.scss";
+
+.Layout {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+
+    main.PageContainer {
+        flex: 1;
+        padding-bottom: 1rem;
+
+        >div {
+            max-width: 70rem;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+    }
+}
+
+header.Header {
+    padding: 0 .5rem;
+    background-color: #1976d2;
+    color: white;
+    box-shadow: 0px 0px 10px 0px #1976d2;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+
+    >div.HeaderContent {
+        max-width: 70rem;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        >span.Burger {
+            display: none;
+            @media(width <= $br-small){
+                display: block;
+            }
+        }
+
+        div.AvatarMenu {
+            display: flex;
+            margin-left: auto;
+        }
+
+        > a {
+            margin-left: 1rem;
+            font-weight: bold;
+            @media (width <= $br-small){
+                display: none;
+            }
+        }
+    }
+}
+
+
+footer.Footer {
+    display: none;
+    padding: 1rem;
+    margin: .5rem 0;
+
+    >div {
+        max-width: 70rem;
+        margin: 0 auto;
+    }
+}
+
+div.DrawerContent {
+    display: flex;
+    flex-direction: column;
+    padding: 0 1rem 1rem 1rem;
+    width: 90vw;
+
+    > a {
+        margin: .75rem 0;
+        font-weight: bold;
+    }
+
+    > span {
+        display: flex;
+        justify-content: end;
+        margin: 6px 0 0 0;
+    }
+}

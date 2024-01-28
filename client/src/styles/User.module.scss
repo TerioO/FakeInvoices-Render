@@ -1,0 +1,65 @@
+@import "./ct.scss";
+
+div.Profile {
+    position: relative;
+
+    >h1 {
+        text-align: center;
+        word-break: break-all;
+        margin: 3rem 0;
+
+        @media (width <=$br-small) {
+            margin: 1rem 0;
+        }
+    }
+
+    div.GridDisplay {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        row-gap: 1.5rem;
+        column-gap: 1rem;
+
+        p {
+            margin: 0;
+        }
+
+        .rolesArray {
+
+            >p+p {
+                margin-top: .5rem;
+            }
+        }
+    }
+}
+
+div.UsersList {
+    >h1 {
+        margin: 3rem 0;
+        text-align: center;
+
+        @media (width <=$br-small) {
+            margin: 1rem 0;
+        }
+    }
+
+    h3 {
+        margin: .5rem 0;
+    }
+
+    div.UsersAccordionDetails {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        row-gap: 1.5rem;
+        column-gap: 1rem;
+
+        p {
+            margin: 0;
+        }
+    }
+
+    div.UsersPagination {
+        display: flex;
+        justify-content: center;
+        margin: 1rem 0 1.5rem 0;
+    }
+}
