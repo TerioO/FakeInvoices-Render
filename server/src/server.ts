@@ -4,7 +4,7 @@ import env from "./config/env";
 
 const app = createApp();
 let connectionString = "";
-let dbName = "";
+let dbName = "FakeInvoices";
 if(env.NODE_ENV === "development") {
     connectionString = env.MONGO_URI_DEV;
     dbName = env.MONGO_DB_DEV;
