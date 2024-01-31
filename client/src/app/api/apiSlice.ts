@@ -1,7 +1,6 @@
 import { createApi, fetchBaseQuery, BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
 import { RootState } from '../store';
 import { setCredentials, logout } from '../../features/auth/authSlice';
-import { setGLobalSnackbarMessage } from '../slices/globalSnackbarSlice';
 
 let baseUrl = "";
 let keepUnusedDataFor = 5;
@@ -32,7 +31,7 @@ const baseQueryWithReauth: BaseQueryFn<
     FetchBaseQueryError
 > = async (args, api, extraOptions) => {
     let result = await baseQuery(args, api, extraOptions);
-    if (result.error && (result.error.status === 403 || result.error.status === 401)) {
+    if (result.error && result.error.status === 403) {
         const refreshResult = await baseQuery("/auth/refresh", api, extraOptions);
         if (refreshResult?.data) {
             console.log("Fetching new access token.");
@@ -42,7 +41,6 @@ const baseQueryWithReauth: BaseQueryFn<
         else {
             console.log("Refresh token expired.");
             api.dispatch(logout());
-            api.dispatch(setGLobalSnackbarMessage("Session expired, login required"))
         }
     }
     return result;

@@ -16,15 +16,10 @@ export const verifyJWT = async (req: Request, res: Response<unknown, ResLocals>,
         res.locals.id = decoded.UserInfo.id;
         res.locals.firstName = decoded.UserInfo.firstName;
         res.locals.roles = decoded.UserInfo.roles;
+        res.locals.isVerified = decoded.UserInfo.isVerified;
         next();
     }
     catch (error) {
-        if (error instanceof jwt.TokenExpiredError) {
-            return next(createHttpError(403, "Unauthorized, session expired, please login"));
-        }
-        else if (error instanceof jwt.JsonWebTokenError) {
-            return next(createHttpError(403, error.message));
-        }
         next(error);
     }
 };

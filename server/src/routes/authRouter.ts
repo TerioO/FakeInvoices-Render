@@ -3,16 +3,10 @@ import * as handlers from "../controllers/authController";
 
 const router = express.Router();
 
-router.route("/login")
-    .post(handlers.login);
-
-router.route("/register")
-    .post(handlers.register);
-
-router.route("/logout")
-    .get(handlers.logout);
-
-router.route("/refresh")
-    .get(handlers.refresh);
+router.post("/login", handlers.login);
+router.post("/register", handlers.register);
+router.get("/logout", handlers.logout);
+router.get("/refresh", handlers.refresh);
+router.get("/verify/:emailToken", handlers.verifyEmail); 
 
 export default router;

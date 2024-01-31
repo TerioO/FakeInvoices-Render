@@ -9,13 +9,15 @@ interface JWTPayload {
         id: string,
         firstName: string,
         roles: RolesType,
+        isVerified: boolean
     }
 }
 
 interface UserInfo {
     firstName: string,
     roles: RolesType,
-    status: "NOT LOGGED" | "LOGGED IN"
+    status: "NOT LOGGED" | "LOGGED IN",
+    isVerified: boolean
 }
 
 export const useAuth = () => {
@@ -23,7 +25,8 @@ export const useAuth = () => {
     const returnValue: UserInfo = {
         firstName: "",
         roles: [],
-        status: "NOT LOGGED"
+        status: "NOT LOGGED",
+        isVerified: false
     }
 
     if(token) {
@@ -31,6 +34,7 @@ export const useAuth = () => {
         returnValue.firstName = decoded.UserInfo.firstName;
         returnValue.roles = decoded.UserInfo.roles;
         returnValue.status = "LOGGED IN";
+        returnValue.isVerified = decoded.UserInfo.isVerified
     }
 
     return returnValue;

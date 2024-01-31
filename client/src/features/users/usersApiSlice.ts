@@ -10,6 +10,7 @@ export interface User {
     phone: string,
     password: string,
     roles: RolesType[],
+    isVerified: boolean,
     createdAt: Date,
     updatedAt: Date
 }

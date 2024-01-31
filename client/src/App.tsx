@@ -13,6 +13,7 @@ import PageContainer from "./components/Layout/PageContainer";
 import InvoicesList from "./features/invoices/InvoicesList";
 import MyInvoices from "./features/invoices/MyInvoices";
 import SingleInvoice from "./features/invoices/SingleInvoice";
+import VerifyEmail from "./features/auth/VerifyEmail";
 
 function App() {
     return (
@@ -20,6 +21,7 @@ function App() {
             <Route path="/" element={<Layout />}>
                 <Route path="/login" element={<Login />}></Route>
                 <Route path="/register" element={<Register />}></Route>
+                <Route path="/verify/:emailToken" element={<VerifyEmail />}></Route>
 
                 <Route element={<PageContainer />}>
                     <Route element={<PersistLogin />}>

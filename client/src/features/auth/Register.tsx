@@ -1,10 +1,12 @@
 import s from "../../styles/Auth.module.scss";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     useRegisterMutation,
     useLoginMutation,
     RegisterPayload,
 } from "./authApiSlice";
+import { useAppDispatch } from "../../app/hooks";
+import { setGLobalSnackbarMessage } from "../../app/slices/globalSnackbarSlice";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useGetErrorMessage } from "../../hooks/useGetErrorMessage";
 import PasswordInput from "../../components/utils/PasswordInput";
@@ -23,13 +25,15 @@ const initialFormState: RegisterPayload = {
 
 export default function Register() {
     const navigate = useNavigate();
+    const dispatch = useAppDispatch();
     const [form, setForm] = useState<RegisterPayload>(initialFormState);
     const [register, { isLoading: isRegisterLoading, error: registerError }] =
         useRegisterMutation();
-    const [login, { isLoading: isLoginLoading, isError: isLoginError }] =
+    const [login, { isLoading: isLoginLoading, isError: isLoginError, error: errorLogin }] =
         useLoginMutation();
 
     const errorMsg = useGetErrorMessage(registerError, form);
+    const loginErrorMsg = useGetErrorMessage(errorLogin, null);
 
     const handleFormUpdate = (
         e: React.ChangeEvent<HTMLInputElement>,
@@ -52,11 +56,18 @@ export default function Register() {
         try {
             await register(form).unwrap();
             await login(form).unwrap();
-            navigate("/");
         } catch (error) {
-            if (isLoginError) navigate("/login");
+            //
         }
     };
+
+    useEffect(() => {
+        if(isLoginError) {
+            dispatch(setGLobalSnackbarMessage(loginErrorMsg || "Login: unknown error"));
+            navigate("/login");
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isLoginError])
 
     return (
         <div className={s.Register}>

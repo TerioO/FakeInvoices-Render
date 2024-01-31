@@ -6,9 +6,10 @@ import bcrypt from "bcrypt";
 import User, { UserCreateInterface } from "../models/User";
 import { COUNTRIES } from "../constants/countries";
 import { createFakeInvoices } from "../faker/createFakeInvoices";
+import { transporter } from "../config/createMailTransporter";
 
-const ACCESS_TOKEN_EXPIRES: string = "1d";
-const REFRESH_TOKEN_EXPIRES: string = "2d";
+const ACCESS_TOKEN_EXPIRES: string = "10s";
+const REFRESH_TOKEN_EXPIRES: string = "20s";
 const COOKIE_MAX_AGE: number = 1000 * 60 * 60 * 48;
 
 export interface AccessTokenPayload {
@@ -18,7 +19,8 @@ export interface AccessTokenPayload {
 export interface ResLocals {
     id: string,
     firstName: string,
-    roles: string[]
+    roles: string[],
+    isVerified: boolean,
 }
 
 export interface RefreshTokenPayload {
@@ -33,6 +35,10 @@ const createAccessToken = (payload: AccessTokenPayload) => {
 
 const createRefreshToken = (payload: RefreshTokenPayload) => {
     return jwt.sign(payload, env.REFRESH_TOKEN_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRES });
+};
+
+const createEmailToken = (payload: { userId: string }) => {
+    return jwt.sign(payload, env.EMAIL_TOKEN_SECRET, { expiresIn: "600s" });
 };
 
 export const register = async (req: Request<unknown, unknown, UserCreateInterface, unknown>, res: Response, next: NextFunction) => {
@@ -56,7 +62,7 @@ export const register = async (req: Request<unknown, unknown, UserCreateInterfac
         const createdUser = await User.create(newUser);
         if (!createdUser) throw createHttpError(400, "Invalid data received");
         createFakeInvoices(createdUser._id.toString(), next, 15);
-        res.status(201).json({ message: `New user ${createdUser.email} created` });
+        res.status(201).json({ message: `New user ${createdUser.email} created, check email to verify your account.`, });
     }
     catch (error) {
         next(error);
@@ -76,12 +82,31 @@ export const login = async (req: Request<unknown, unknown, LoginReqBody, unknown
         if (!foundUser) throw createHttpError(400, "Incorrect email");
         const match = await bcrypt.compare(password, foundUser.password);
         if (!match) throw createHttpError(400, "Incorrect password");
+        if (!foundUser.isVerified) {
+            const emailToken = createEmailToken({ userId: foundUser._id.toString() });
+            const currentDomain = env.isDevelopment
+                ? req.headers.origin
+                : env.DOMAIN_CLIENT_PROD;
+            const href = `${currentDomain}/verify/${emailToken}`;
+            await transporter.sendMail({
+                to: foundUser.email,
+                from: env.EMAIL_USER,
+                subject: `Verification link for ${currentDomain}`,
+                html: `
+                    <p>Click the link bellow to verify you account.</p>
+                    <br/>
+                    <a href=${href}>${href}</a>
+                `
+            });
+            throw createHttpError(401, "User not verified, check email");
+        }
 
         const accessToken = createAccessToken({
             UserInfo: {
                 id: foundUser._id.toString(),
                 firstName: foundUser.firstName,
-                roles: foundUser.roles
+                roles: foundUser.roles,
+                isVerified: foundUser.isVerified,
             }
         });
         const refreshToken = createRefreshToken({
@@ -115,14 +140,13 @@ export const refresh: RequestHandler = async (req, res, next) => {
             UserInfo: {
                 id: foundUser._id.toString(),
                 firstName: foundUser.firstName,
-                roles: foundUser.roles
+                roles: foundUser.roles,
+                isVerified: foundUser.isVerified
             }
         });
         res.status(200).json({ accessToken });
     }
     catch (error) {
-        if (error instanceof jwt.TokenExpiredError) next(createHttpError(403, "Session expired, login required"));
-        else if (error instanceof jwt.JsonWebTokenError) next(createHttpError(403, error.message));
         next(error);
     }
 };
@@ -140,6 +164,21 @@ export const logout: RequestHandler = async (req, res, next) => {
         res.status(200).json({ message: "Successfully logged out" });
     }
     catch (error) {
+        next(error);
+    }
+};
+
+export const verifyEmail = async (req: Request<{emailToken: string}, unknown, unknown, unknown>, res: Response, next: NextFunction) => {
+    const { emailToken } = req.params;
+    try {
+        const decoded = jwt.verify(emailToken, env.EMAIL_TOKEN_SECRET) as { userId: string };
+        const foundUser = await User.findById(decoded.userId);
+        if(!foundUser) throw createHttpError(404, "User not found");
+        foundUser.isVerified = true;
+        await foundUser.save();
+        res.status(200).json({ message: "Account verified!" });
+    }
+    catch(error){
         next(error);
     }
 };

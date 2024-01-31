@@ -71,6 +71,9 @@ export const authApiSlice = apiSlice.injectEndpoints({
                     //
                 }
             }
+        }),
+        verifyEmail: build.query<{ message: string }, { emailToken: string | undefined }>({
+            query: ({ emailToken }) => `/auth/verify/${emailToken}`
         })
     })
 })
@@ -83,5 +86,6 @@ export const {
     useLoginMutation,
     useRegisterMutation,
     useLazyLogoutQuery,
-    useLazyRefreshQuery
+    useLazyRefreshQuery,
+    useVerifyEmailQuery
 } = authApiSlice;

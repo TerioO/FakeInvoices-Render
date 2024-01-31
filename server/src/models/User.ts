@@ -8,6 +8,7 @@ export interface UserInterface {
     phone: string,
     password: string,
     roles: string[],
+    isVerified: boolean,
     createdAt: Date,
     updatedAt: Date
 }
@@ -50,6 +51,10 @@ const userSchema = new mongoose.Schema({
     roles: {
         type: [String],
         default: "USER"
+    },
+    isVerified: {
+        type: Boolean,
+        default: false
     }
 }, { timestamps: true });
 
