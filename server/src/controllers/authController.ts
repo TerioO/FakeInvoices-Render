@@ -6,7 +6,7 @@ import bcrypt from "bcrypt";
 import User, { UserCreateInterface } from "../models/User";
 import { COUNTRIES } from "../constants/countries";
 import { createFakeInvoices } from "../faker/createFakeInvoices";
-import { transporter } from "../config/createMailTransporter";
+// import { transporter } from "../config/createMailTransporter";
 
 const ACCESS_TOKEN_EXPIRES: string = "10s";
 const REFRESH_TOKEN_EXPIRES: string = "20s";
@@ -37,9 +37,9 @@ const createRefreshToken = (payload: RefreshTokenPayload) => {
     return jwt.sign(payload, env.REFRESH_TOKEN_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRES });
 };
 
-const createEmailToken = (payload: { userId: string }) => {
-    return jwt.sign(payload, env.EMAIL_TOKEN_SECRET, { expiresIn: "600s" });
-};
+// const createEmailToken = (payload: { userId: string }) => {
+//     return jwt.sign(payload, env.EMAIL_TOKEN_SECRET, { expiresIn: "600s" });
+// };
 
 export const register = async (req: Request<unknown, unknown, UserCreateInterface, unknown>, res: Response, next: NextFunction) => {
     const { firstName, password, lastName, country, email, phone } = req.body;
@@ -99,7 +99,7 @@ export const login = async (req: Request<unknown, unknown, LoginReqBody, unknown
         //         `
         //     });
         //     throw createHttpError(401, "User not verified, check email");
-        }
+        // }
 
         const accessToken = createAccessToken({
             UserInfo: {
