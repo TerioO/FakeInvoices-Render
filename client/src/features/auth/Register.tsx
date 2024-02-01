@@ -27,9 +27,9 @@ export default function Register() {
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
     const [form, setForm] = useState<RegisterPayload>(initialFormState);
-    const [register, { isLoading: isRegisterLoading, error: registerError }] =
+    const [register, { isLoading: isRegisterLoading, error: registerError, isSuccess: isRegisterSuccess }] =
         useRegisterMutation();
-    const [login, { isLoading: isLoginLoading, isError: isLoginError, error: errorLogin }] =
+    const [login, { isLoading: isLoginLoading, isError: isLoginError, error: errorLogin, isSucess: isLoginSuccess }] =
         useLoginMutation();
 
     const errorMsg = useGetErrorMessage(registerError, form);
@@ -66,8 +66,9 @@ export default function Register() {
             dispatch(setGLobalSnackbarMessage(loginErrorMsg || "Login: unknown error"));
             navigate("/login");
         }
+        else if(isLoginSuccess && isRegisterSuccess) navigate("/");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isLoginError])
+    }, [isLoginError, isRegisterSuccess, isLoginSuccess])
 
     return (
         <div className={s.Register}>
