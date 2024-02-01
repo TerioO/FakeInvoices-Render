@@ -29,7 +29,7 @@ export default function Register() {
     const [form, setForm] = useState<RegisterPayload>(initialFormState);
     const [register, { isLoading: isRegisterLoading, error: registerError, isSuccess: isRegisterSuccess }] =
         useRegisterMutation();
-    const [login, { isLoading: isLoginLoading, isError: isLoginError, error: errorLogin, isSucess: isLoginSuccess }] =
+    const [login, { isLoading: isLoginLoading, isError: isLoginError, error: errorLogin, isSuccess: isLoginSuccess }] =
         useLoginMutation();
 
     const errorMsg = useGetErrorMessage(registerError, form);
