@@ -39,6 +39,10 @@ export default function Login() {
         }
     };
 
+    const handleCheckboxClick = () => {
+        
+    }
+
     return (
         <div className={s.Login}>
             <form onSubmit={handleSubmit}>
@@ -67,6 +71,7 @@ export default function Login() {
                 <FormControlLabel
                     label="Remember me?"
                     sx={{ marginTop: ".5rem" }}
+                    onClick={handleCheckboxClick}
                     control={
                         <Checkbox
                             checked={persistLogin}

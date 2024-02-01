@@ -21,7 +21,7 @@ export const errorHandler = (error: unknown, req: Request, res: Response, next: 
     }
     else if(error instanceof Error){
         statusCode = 400;
-        message = error.message;
+        message = "Unknown error";
     }
     console.log(error);
     res.status(statusCode).json({ message, isError: true });

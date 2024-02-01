@@ -82,23 +82,23 @@ export const login = async (req: Request<unknown, unknown, LoginReqBody, unknown
         if (!foundUser) throw createHttpError(400, "Incorrect email");
         const match = await bcrypt.compare(password, foundUser.password);
         if (!match) throw createHttpError(400, "Incorrect password");
-        if (!foundUser.isVerified) {
-            const emailToken = createEmailToken({ userId: foundUser._id.toString() });
-            const currentDomain = env.isDevelopment
-                ? req.headers.origin
-                : env.DOMAIN_CLIENT_PROD;
-            const href = `${currentDomain}/verify/${emailToken}`;
-            await transporter.sendMail({
-                to: foundUser.email,
-                from: env.EMAIL_USER,
-                subject: `Verification link for ${currentDomain}`,
-                html: `
-                    <p>Click the link bellow to verify you account.</p>
-                    <br/>
-                    <a href=${href}>${href}</a>
-                `
-            });
-            throw createHttpError(401, "User not verified, check email");
+        // if (!foundUser.isVerified) {
+        //     const emailToken = createEmailToken({ userId: foundUser._id.toString() });
+        //     const currentDomain = env.isDevelopment
+        //         ? req.headers.origin
+        //         : env.DOMAIN_CLIENT_PROD;
+        //     const href = `${currentDomain}/verify/${emailToken}`;
+        //     await transporter.sendMail({
+        //         to: foundUser.email,
+        //         from: env.EMAIL_USER,
+        //         subject: `Verification link for ${currentDomain}`,
+        //         html: `
+        //             <p>Click the link bellow to verify you account.</p>
+        //             <br/>
+        //             <a href=${href}>${href}</a>
+        //         `
+        //     });
+        //     throw createHttpError(401, "User not verified, check email");
         }
 
         const accessToken = createAccessToken({
@@ -174,6 +174,7 @@ export const verifyEmail = async (req: Request<{emailToken: string}, unknown, un
         const decoded = jwt.verify(emailToken, env.EMAIL_TOKEN_SECRET) as { userId: string };
         const foundUser = await User.findById(decoded.userId);
         if(!foundUser) throw createHttpError(404, "User not found");
+        if(foundUser.isVerified) return res.status(200).json({ message: "Account already verified!" });
         foundUser.isVerified = true;
         await foundUser.save();
         res.status(200).json({ message: "Account verified!" });
