@@ -5,11 +5,12 @@ import env from "../config/env";
 import bcrypt from "bcrypt";
 import User, { UserCreateInterface } from "../models/User";
 import { COUNTRIES } from "../constants/countries";
+import { PASSWORD_REGEX, NAME_REGEX } from "../constants/regex";
 import { createFakeInvoices } from "../faker/createFakeInvoices";
 // import { transporter } from "../config/createMailTransporter";
 
-const ACCESS_TOKEN_EXPIRES: string = "10s";
-const REFRESH_TOKEN_EXPIRES: string = "20s";
+const ACCESS_TOKEN_EXPIRES: string = "1d";
+const REFRESH_TOKEN_EXPIRES: string = "2d";
 const COOKIE_MAX_AGE: number = 1000 * 60 * 60 * 48;
 
 export interface AccessTokenPayload {
@@ -46,6 +47,8 @@ export const register = async (req: Request<unknown, unknown, UserCreateInterfac
     try {
         if (!firstName || !password || !lastName || !country || !email || !phone) throw createHttpError(400, "Please complete all the fields");
         if (!COUNTRIES.includes(country)) throw createHttpError(400, "Include a valid country");
+        if (!NAME_REGEX.test(firstName) || !NAME_REGEX.test(lastName)) throw createHttpError(400, "Invalid name");
+        if (!PASSWORD_REGEX.test(password)) throw createHttpError(400, "Password not strong enough");
         const duplicate = await User.findOne({ email }).lean().exec();
         if (duplicate) throw createHttpError(401, "Email already used");
 
@@ -168,18 +171,18 @@ export const logout: RequestHandler = async (req, res, next) => {
     }
 };
 
-export const verifyEmail = async (req: Request<{emailToken: string}, unknown, unknown, unknown>, res: Response, next: NextFunction) => {
-    const { emailToken } = req.params;
-    try {
-        const decoded = jwt.verify(emailToken, env.EMAIL_TOKEN_SECRET) as { userId: string };
-        const foundUser = await User.findById(decoded.userId);
-        if(!foundUser) throw createHttpError(404, "User not found");
-        if(foundUser.isVerified) return res.status(200).json({ message: "Account already verified!" });
-        foundUser.isVerified = true;
-        await foundUser.save();
-        res.status(200).json({ message: "Account verified!" });
-    }
-    catch(error){
-        next(error);
-    }
-};
+// export const verifyEmail = async (req: Request<{emailToken: string}, unknown, unknown, unknown>, res: Response, next: NextFunction) => {
+//     const { emailToken } = req.params;
+//     try {
+//         const decoded = jwt.verify(emailToken, env.EMAIL_TOKEN_SECRET) as { userId: string };
+//         const foundUser = await User.findById(decoded.userId);
+//         if(!foundUser) throw createHttpError(404, "User not found");
+//         if(foundUser.isVerified) return res.status(200).json({ message: "Account already verified!" });
+//         foundUser.isVerified = true;
+//         await foundUser.save();
+//         res.status(200).json({ message: "Account verified!" });
+//     }
+//     catch(error){
+//         next(error);
+//     }
+// };

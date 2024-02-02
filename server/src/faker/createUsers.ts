@@ -26,7 +26,7 @@ export const createUsers = async (DOMAIN: string, N: number) => {
             firstName,
             lastName: faker.person.lastName(),
             email,
-            password: firstName,
+            password: `${firstName}-00000`,
             phone: faker.phone.imei(),
             country: faker.location.country()
         });

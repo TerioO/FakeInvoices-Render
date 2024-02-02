@@ -29,3 +29,32 @@ a {
     text-decoration: none;
     color: inherit;
 }
+
+div.modal-container {
+    div.modal-content {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: white;
+        padding: 1rem;
+        border-radius: .25rem;
+        @media(width <= $br-small){
+            width: 90vw;
+        }
+
+        > span {
+            align-self: flex-end;
+            margin-bottom: 1rem;
+        }
+
+        > p {
+            margin: 0;
+            & + p {
+                margin-top: 1rem;
+            }
+        }
+    }
+}

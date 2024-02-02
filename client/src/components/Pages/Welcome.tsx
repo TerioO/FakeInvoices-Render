@@ -9,8 +9,7 @@ export default function Welcome() {
 
             <p>
                 You can view how the app behaves when a USER is logged in, read
-                from the users list and the account password is the name of the
-                user E.g: (email:Reed@fake.com password:Reed)
+                from the users list and the account password is firstName-00000 E.g: (email:Reed@fake.com password:Reed-00000)
             </p>
 
             <p>Features: </p>
@@ -39,8 +38,8 @@ export default function Welcome() {
                     version of it
                 </li>
                 <li>Each ADMIN can view a list of all the users/invoices</li>
-                <li>Each new user is assigned ADMIN role</li>
-                <li>By default the database contains a few fake users </li>
+                <li>Each new user is assigned USER role</li>
+                <li>By default the database contains a few fake users</li>
             </ul>
 
             <p>Stack Frontend: </p>

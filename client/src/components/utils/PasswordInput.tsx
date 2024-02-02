@@ -12,6 +12,8 @@ type Props = {
     fullWidth?: boolean;
     variant?: "outlined" | "filled" | "standard";
     margin?: "none" | "dense" | "normal";
+    error?: boolean;
+    helperText?: string;
     value: string;
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 };
@@ -25,6 +27,8 @@ export default function PasswordInput({
     fullWidth,
     variant,
     margin,
+    error,
+    helperText,
     value,
     onChange
 }: Props) {
@@ -40,6 +44,8 @@ export default function PasswordInput({
             fullWidth={fullWidth || false}
             variant={variant || "outlined"}
             margin={margin || "normal"}
+            error={error || false}
+            helperText={helperText || ""}
             value={value}
             onChange={onChange}
             InputProps={{

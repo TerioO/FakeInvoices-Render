@@ -13,42 +13,78 @@ import PasswordInput from "../../components/utils/PasswordInput";
 import TextInput from "../../components/utils/TextInput";
 import { Button, LinearProgress, Autocomplete, TextField } from "@mui/material";
 import { COUNTRIES } from "../../constants/countries";
+import { PASSWORD_REGEX, NAME_REGEX } from "../../constants/regex";
 
-const initialFormState: RegisterPayload = {
+interface FormState extends RegisterPayload {
+    errorFirstName: boolean;
+    errorLastName: boolean;
+    errorPassword: boolean;
+}
+
+const initialFormState: FormState = {
     firstName: "",
     lastName: "",
     email: "",
     password: "",
     country: COUNTRIES[180],
     phone: "",
+    errorFirstName: false,
+    errorLastName: false,
+    errorPassword: false,
 };
 
 export default function Register() {
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
-    const [form, setForm] = useState<RegisterPayload>(initialFormState);
-    const [register, { isLoading: isRegisterLoading, error: registerError, isSuccess: isRegisterSuccess }] =
-        useRegisterMutation();
-    const [login, { isLoading: isLoginLoading, isError: isLoginError, error: errorLogin, isSuccess: isLoginSuccess }] =
-        useLoginMutation();
+    const [form, setForm] = useState<FormState>(initialFormState);
+    const [
+        register,
+        {
+            isLoading: isRegisterLoading,
+            error: registerError,
+            isSuccess: isRegisterSuccess,
+        },
+    ] = useRegisterMutation();
+    const [
+        login,
+        {
+            isLoading: isLoginLoading,
+            isError: isLoginError,
+            error: errorLogin,
+            isSuccess: isLoginSuccess,
+        },
+    ] = useLoginMutation();
 
     const errorMsg = useGetErrorMessage(registerError, form);
     const loginErrorMsg = useGetErrorMessage(errorLogin, null);
 
     const handleFormUpdate = (
         e: React.ChangeEvent<HTMLInputElement>,
-        property: keyof RegisterPayload
+        property: keyof FormState
     ) => {
-        if (property === "firstName" || property === "lastName")
-            setForm((prev) => {
-                return {
-                    ...prev,
-                    [property]:
-                        e.target.value.charAt(0).toUpperCase() +
-                        e.target.value.slice(1),
-                };
-            });
-        else setForm((prev) => ({ ...prev, [property]: e.target.value }));
+        if (property === "firstName") {
+            setForm((prev) => ({
+                ...prev,
+                [property]:
+                    e.target.value.charAt(0).toUpperCase() +
+                    e.target.value.slice(1),
+                errorFirstName: !NAME_REGEX.test(e.target.value)
+            }));
+        } else if (property === "lastName") {
+            setForm((prev) => ({
+                ...prev,
+                [property]:
+                    e.target.value.charAt(0).toUpperCase() +
+                    e.target.value.slice(1),
+                errorLastName: !NAME_REGEX.test(e.target.value)
+            }));
+        } else if (property === "password") {
+            setForm((prev) => ({
+                ...prev,
+                [property]: e.target.value,
+                errorPassword: !PASSWORD_REGEX.test(e.target.value),
+            }));
+        } else setForm((prev) => ({ ...prev, [property]: e.target.value }));
     };
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -62,13 +98,16 @@ export default function Register() {
     };
 
     useEffect(() => {
-        if(isLoginError) {
-            dispatch(setGLobalSnackbarMessage(loginErrorMsg || "Login: unknown error"));
+        if (isLoginError) {
+            dispatch(
+                setGLobalSnackbarMessage(
+                    loginErrorMsg || "Login: unknown error"
+                )
+            );
             navigate("/login");
-        }
-        else if(isLoginSuccess && isRegisterSuccess) navigate("/");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isLoginError, isRegisterSuccess, isLoginSuccess])
+        } else if (isLoginSuccess && isRegisterSuccess) navigate("/");
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isLoginError, isRegisterSuccess, isLoginSuccess]);
 
     return (
         <div className={s.Register}>
@@ -77,12 +116,14 @@ export default function Register() {
                 <TextInput
                     label="First Name"
                     required
+                    error={form.errorFirstName}
                     value={form.firstName}
                     onChange={(e) => handleFormUpdate(e, "firstName")}
                 />
                 <TextInput
                     label="Last Name"
                     required
+                    error={form.errorLastName}
                     value={form.lastName}
                     onChange={(e) => handleFormUpdate(e, "lastName")}
                 />
@@ -95,6 +136,7 @@ export default function Register() {
                 />
                 <PasswordInput
                     value={form.password}
+                    error={form.errorPassword}
                     onChange={(e) => handleFormUpdate(e, "password")}
                 />
                 <Autocomplete

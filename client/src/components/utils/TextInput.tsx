@@ -8,6 +8,8 @@ type Props = {
     fullWidth?: boolean;
     variant?: "outlined" | "filled" | "standard";
     margin?: "none" | "dense" | "normal";
+    error?: boolean;
+    helperText?: string;
     type?: string;
     value: string;
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -22,6 +24,8 @@ export default function TextInput({
     variant,
     type,
     margin,
+    error,
+    helperText,
     value,
     onChange,
 }: Props) {
@@ -35,6 +39,8 @@ export default function TextInput({
             fullWidth={fullWidth || false}
             variant={variant || "outlined"}
             margin={margin || "normal"}
+            error={error || false}
+            helperText={helperText || ""}
             value={value}
             onChange={onChange}
         />

@@ -11,8 +11,11 @@ import {
     FormControlLabel,
     Checkbox,
     LinearProgress,
+    Modal,
+    IconButton,
 } from "@mui/material";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import CloseIcon from "@mui/icons-material/Close";
 
 const initialLoginState: LoginPayload = {
     email: "",
@@ -22,6 +25,7 @@ const initialLoginState: LoginPayload = {
 export default function Login() {
     const navigate = useNavigate();
     const [form, setForm] = useState<LoginPayload>(initialLoginState);
+    const [open, setOpen] = useState<boolean>(false);
     const persistLogin = useAppSelector(selectPersistLogin);
     const dispatch = useAppDispatch();
     const [login, { isLoading, error }] = useLoginMutation();
@@ -38,10 +42,6 @@ export default function Login() {
             /* */
         }
     };
-
-    const handleCheckboxClick = () => {
-        
-    }
 
     return (
         <div className={s.Login}>
@@ -71,12 +71,12 @@ export default function Login() {
                 <FormControlLabel
                     label="Remember me?"
                     sx={{ marginTop: ".5rem" }}
-                    onClick={handleCheckboxClick}
                     control={
                         <Checkbox
                             checked={persistLogin}
                             onChange={(e) => {
                                 dispatch(setPersistLogin(e.target.checked));
+                                if (e.target.checked) setOpen(true);
                             }}
                         />
                     }
@@ -95,6 +95,36 @@ export default function Login() {
                     </div>
                 )}
             </form>
+            {import.meta.env.PROD && (
+                <Modal
+                    open={open}
+                    onClose={() => {
+                        setOpen(false);
+                    }}
+                >
+                    <div className="modal-container">
+                        <div className="modal-content">
+                            <span>
+                                <IconButton
+                                    onClick={() => {
+                                        setOpen(false);
+                                    }}
+                                >
+                                    <CloseIcon />
+                                </IconButton>
+                            </span>
+                            <p>
+                                To enable this function, 3rd party cookies must
+                                be enabled from your browser.
+                            </p>
+                            <p>
+                                Otherwise you will lose login session on every
+                                page reload or new tab.
+                            </p>
+                        </div>
+                    </div>
+                </Modal>
+            )}
         </div>
     );
 }
