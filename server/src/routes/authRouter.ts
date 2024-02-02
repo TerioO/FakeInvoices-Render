@@ -7,6 +7,7 @@ router.post("/login", handlers.login);
 router.post("/register", handlers.register);
 router.get("/logout", handlers.logout);
 router.get("/refresh", handlers.refresh);
-// router.get("/verify/:emailToken", handlers.verifyEmail); 
+router.get("/verify/:emailToken", handlers.verifyEmail); 
+router.get("/brevo1", handlers.getBrevoEmail);
 
 export default router;

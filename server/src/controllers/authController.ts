@@ -7,6 +7,7 @@ import User, { UserCreateInterface } from "../models/User";
 import { COUNTRIES } from "../constants/countries";
 import { PASSWORD_REGEX, NAME_REGEX } from "../constants/regex";
 import { createFakeInvoices } from "../faker/createFakeInvoices";
+import { BrevoEmailPayload } from "../constants/brevoTypes";
 // import { transporter } from "../config/createMailTransporter";
 
 const ACCESS_TOKEN_EXPIRES: string = "1d";
@@ -38,9 +39,9 @@ const createRefreshToken = (payload: RefreshTokenPayload) => {
     return jwt.sign(payload, env.REFRESH_TOKEN_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRES });
 };
 
-// const createEmailToken = (payload: { userId: string }) => {
-//     return jwt.sign(payload, env.EMAIL_TOKEN_SECRET, { expiresIn: "600s" });
-// };
+const createEmailToken = (payload: { userId: string }) => {
+    return jwt.sign(payload, env.EMAIL_TOKEN_SECRET, { expiresIn: "600s" });
+};
 
 export const register = async (req: Request<unknown, unknown, UserCreateInterface, unknown>, res: Response, next: NextFunction) => {
     const { firstName, password, lastName, country, email, phone } = req.body;
@@ -85,24 +86,36 @@ export const login = async (req: Request<unknown, unknown, LoginReqBody, unknown
         if (!foundUser) throw createHttpError(400, "Incorrect email");
         const match = await bcrypt.compare(password, foundUser.password);
         if (!match) throw createHttpError(400, "Incorrect password");
-        // if (!foundUser.isVerified) {
-        //     const emailToken = createEmailToken({ userId: foundUser._id.toString() });
-        //     const currentDomain = env.isDevelopment
-        //         ? req.headers.origin
-        //         : env.DOMAIN_CLIENT_PROD;
-        //     const href = `${currentDomain}/verify/${emailToken}`;
-        //     await transporter.sendMail({
-        //         to: foundUser.email,
-        //         from: env.EMAIL_USER,
-        //         subject: `Verification link for ${currentDomain}`,
-        //         html: `
-        //             <p>Click the link bellow to verify you account.</p>
-        //             <br/>
-        //             <a href=${href}>${href}</a>
-        //         `
-        //     });
-        //     throw createHttpError(401, "User not verified, check email");
-        // }
+        if (!foundUser.isVerified) {
+            const emailToken = createEmailToken({ userId: foundUser._id.toString() });
+            const currentDomain = env.isDevelopment
+                ? req.headers.origin
+                : env.DOMAIN_CLIENT_PROD;
+            const href = `${currentDomain}/verify/${emailToken}`;
+            const payload: BrevoEmailPayload = {
+                sender: {
+                    name: "Terio",
+                    email: env.EMAIL_USER
+                },
+                to: [{
+                    name: foundUser.firstName,
+                    email: foundUser.email
+                }],
+                subject: `Verification link for ${currentDomain}`,
+                htmlContent: `<p>Click the link to verify your account</p><br/><a href=${href}>${href}</a>`
+            };
+            const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+                headers: {
+                    "Content-Type": "application/json",
+                    "api-key": env.EMAIL_API_KEY,
+                    "Accept": "application/json"
+                },
+                method: "POST",
+                body: JSON.stringify(payload)
+            });
+            if(!response.ok) throw createHttpError(401, "Failed to send email");
+            throw createHttpError(401, "User not verified, check email");
+        }
 
         const accessToken = createAccessToken({
             UserInfo: {
@@ -171,18 +184,50 @@ export const logout: RequestHandler = async (req, res, next) => {
     }
 };
 
-// export const verifyEmail = async (req: Request<{emailToken: string}, unknown, unknown, unknown>, res: Response, next: NextFunction) => {
-//     const { emailToken } = req.params;
-//     try {
-//         const decoded = jwt.verify(emailToken, env.EMAIL_TOKEN_SECRET) as { userId: string };
-//         const foundUser = await User.findById(decoded.userId);
-//         if(!foundUser) throw createHttpError(404, "User not found");
-//         if(foundUser.isVerified) return res.status(200).json({ message: "Account already verified!" });
-//         foundUser.isVerified = true;
-//         await foundUser.save();
-//         res.status(200).json({ message: "Account verified!" });
-//     }
-//     catch(error){
-//         next(error);
-//     }
-// };
+export const verifyEmail = async (req: Request<{emailToken: string}, unknown, unknown, unknown>, res: Response, next: NextFunction) => {
+    const { emailToken } = req.params;
+    try {
+        const decoded = jwt.verify(emailToken, env.EMAIL_TOKEN_SECRET) as { userId: string };
+        const foundUser = await User.findById(decoded.userId);
+        if(!foundUser) throw createHttpError(404, "User not found");
+        if(foundUser.isVerified) return res.status(200).json({ message: "Account already verified!" });
+        foundUser.isVerified = true;
+        await foundUser.save();
+        res.status(200).json({ message: "Account verified!" });
+    }
+    catch(error){
+        next(error);
+    }
+};
+
+export const getBrevoEmail: RequestHandler = async (req, res, next) => {
+    try {
+        const payload = {
+            subject: "Testing Brevo",
+            sender: {
+                name: "Terio",
+                email: env.EMAIL_USER
+            },
+            to: [{
+                name: "Andi",
+                email: "andisurdu23@gmail.com"
+            }],
+            htmlContent: "<p>Hello there</p>"
+        };
+        const data = await fetch("https://api.brevo.com/v3/smtp/email", {
+            headers: {
+                "Content-Type": "application/json",
+                "api-key": env.EMAIL_API_KEY,
+                "Accept": "application/json"
+            },
+            method: "POST",
+            body: JSON.stringify(payload)
+        });
+        const json = await data.json();
+        console.log(json);
+        res.status(200).json({ json });
+    }
+    catch(error){
+        next(error);
+    }
+};

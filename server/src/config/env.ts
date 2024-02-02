@@ -15,6 +15,7 @@ const env = cleanEnv(process.env, {
     EMAIL_PASS: str(),
     EMAIL_USER: str(),
     EMAIL_TOKEN_SECRET: str(),
+    EMAIL_API_KEY: str(),
     NODE_ENV: str({ choices: ["development", "test", "production", "staging"] }),
 });
 

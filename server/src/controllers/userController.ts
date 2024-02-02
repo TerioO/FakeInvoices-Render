@@ -105,7 +105,7 @@ export const getUser = async (req: Request<unknown, unknown, unknown, { userId: 
             // User should be able to access his own DB entry:
             if(res.locals.id === userId) allowReq = true;
         }
-        // User is admin/owner ==> can access any DB user's entry:
+        // User is owner ==> can access any DB user's entry:
         else allowReq = true;
         if(!allowReq) throw createHttpError(403, "User doesn't have necessary role");
         const user = await User.findById(userId)
