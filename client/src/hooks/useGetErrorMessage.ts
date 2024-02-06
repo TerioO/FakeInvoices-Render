@@ -8,16 +8,20 @@ export const useGetErrorMessage = (
 ) => {
     const [clearError, setClearError] = useState<boolean>(false);
     let msg: string | undefined = "";
-    if(error){
-        if("status" in error){
-            if("error" in error) msg = error.error;
+    if (error) {
+        if ("status" in error) {
+            if ("error" in error) {
+                // msg = error.error
+                msg = "";
+            }
             else {
                 const res = error.data as { message: string, isError: boolean };
                 msg = res.message;
             }
         }
         else {
-            msg = error.message;
+            // msg = error.message;
+            msg = "";
         }
     }
 

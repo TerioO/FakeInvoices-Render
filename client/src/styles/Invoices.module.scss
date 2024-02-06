@@ -1,7 +1,8 @@
 @import "./ct.scss";
 
 div.InvoicesList,
-div.MyInvoices {
+div.MyInvoices,
+div.UsersInvoices {
     >h1 {
         margin: 3rem 0 0 0;
         text-align: center;
@@ -30,150 +31,30 @@ div.MyInvoices {
 }
 
 div.SingleInvoice {
-    padding: 3rem 0 0 0;
-    @media (width <= $br-small){
-        padding: 0;
-    }
-
-    >h1 {
-        margin: 0;
-    }
-
-    p.FailToFetch {
-        text-align: center;
-        margin-top: 1rem;
-    }
-
-    >div.DownloadButtons {
-        padding: 1rem 0;
+    div.Loading, div.Success, div.Error {
+        margin: 3rem 0;
         display: flex;
         justify-content: center;
+        align-items: center;
     }
 
-    >div.InvoiceBody {
-        padding: 1rem;
-        margin: 0 1rem;
-        border: 1px solid rgb(168, 168, 168);
+    div.Success {
+        flex-direction: column;
+        > h1 {
+            text-align: center;
+            margin-top: 0;
+        }
 
-        >div.InvoiceCompany {
+        > div {
             display: flex;
-            justify-content: space-between;
 
-            >div.CompanyDetails {
-                >h1 {
-                    margin: 0;
-                }
-
-                >p {
-                    margin: 0;
-
-                    &:first-of-type {
-                        margin: .25rem 0 0 0;
-                    }
-
-                    &:nth-of-type(2) {
-                        margin-top: 1.25rem;
-                        font-weight: bold;
-                    }
-
-                    &:nth-of-type(n+3) {
-                        margin: .25rem 0 0 0;
-                    }
-                }
-            }
-
-            >div.CompanyLogo {
-                display: flex;
-                justify-content: center;
-                align-items: center;
-
-                >div {
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    padding: 1rem;
-                    border-radius: 50%;
-                    background-color: #bdbdbd;
-                    color: white;
-                    font-size: 1.5rem;
-                    width: 6rem;
-                    height: 6rem;
-
-                    @media (width <=$br-small) {
-                        width: 4rem;
-                        height: 4rem;
-                        font-size: 1rem;
-                    }
-                }
+            > * {
+                margin: 0 1rem;
             }
         }
+    }
 
-        >div.UserSection {
-            padding: 2rem 0 0 0;
-
-            >p {
-                margin: 0;
-
-                &:first-of-type {
-                    font-weight: bold;
-                }
-
-                &:nth-of-type(n+2) {
-                    margin-top: .25rem;
-                }
-            }
-        }
-
-        >div.Details {
-            margin-top: 3rem;
-
-            @media (width <=$br-small) {
-                display: grid;
-                grid-template-columns: auto 1fr;
-                column-gap: 1rem;
-            }
-
-            >div {
-                display: flex;
-
-                &:first-of-type {
-                    border-bottom: 1px solid black;
-                    border-top: 1px solid black;
-                    padding: .5rem 0;
-                    @media (width <= $br-small){
-                        border-bottom: 0;
-                        border-top: 0;
-                        padding: 0 .5rem 0 0;
-                        border-right: 1px solid black;
-                    }
-                }
-
-                &:last-of-type {
-                    > p {
-                        border-bottom: 1px solid black;
-                        padding: 1.5rem 0 .2rem 0;
-                        width: fit-content;
-                    }
-                }
-
-                margin-bottom: 1rem;
-                @media (width <=$br-small) {
-                    display: block;
-                    margin: 0;
-                }
-
-                >p {
-                    width: 25%;
-                    margin: 0;
-
-                    @media(width <=$br-small) {
-                        width: auto;
-                        & + p {
-                            margin-top: .4rem;
-                        }
-                    }
-                }
-            }
-        }
+    div.Error {
+        color: red;
     }
 }

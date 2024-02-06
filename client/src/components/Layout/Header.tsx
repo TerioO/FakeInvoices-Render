@@ -53,6 +53,7 @@ export default function Header() {
                 <NavLink to="/users">USERS</NavLink>
                 <NavLink to="/invoices">INVOICES</NavLink>
                 <NavLink to="/my-invoices">MY INVOICES</NavLink>
+                <NavLink to="/about">ABOUT</NavLink>
                 <AvatarMenu />
             </div>
             <Drawer anchor="left" open={drawerOpen} onClose={handleCloseDrawer}>

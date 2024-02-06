@@ -13,6 +13,10 @@ div.Profile {
         }
     }
 
+    > button {
+        margin: 1rem 0;
+    }
+
     div.GridDisplay {
         display: grid;
         grid-template-columns: auto 1fr;
@@ -29,6 +33,19 @@ div.Profile {
                 margin-top: .5rem;
             }
         }
+    }
+}
+
+div.ProfileModal {
+    background-color: white;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 1rem;
+    border-radius: .25rem;
+    @media (width <= $br-small){
+        width: 90%;
     }
 }
 
@@ -55,6 +72,11 @@ div.UsersList {
         p {
             margin: 0;
         }
+
+    }
+    
+    div.OpenUserInvoices {
+        margin-top: 1rem;
     }
 
     div.UsersPagination {

@@ -1,7 +1,7 @@
 import { apiSlice } from "../../app/api/apiSlice";
-import { RolesType } from "../../hooks/useAuth";
+import { RoleType } from "../../hooks/useAuth";
 
-export interface User {
+export interface UserI {
     _id: string;
     firstName: string,
     lastName: string,
@@ -9,27 +9,29 @@ export interface User {
     email: string,
     phone: string,
     password: string,
-    roles: RolesType[],
-    isVerified: boolean,
+    role: RoleType,
+    verification: {
+        isVerified: boolean;
+        emailSentAt: Date;
+    }
     createdAt: Date,
     updatedAt: Date
 }
 
-export type UserProfile = Omit<User, "password" | "_id">
-export type Users = Omit<User, "password" | "email">
-export type UserSingle = Omit<User, "password">
+export type UsersI = Omit<UserI, "password">
+export type UserSingleI = Omit<UserI, "password">
 
 interface GetUsersRes {
-    users: Users[]
+    users: UsersI[]
     usersArrayLength: number;
 }
 
-interface GetProfileResponse {
-    profile: UserProfile
+interface GetProfileRes{
+    profile: UserI;
 }
 
 interface GetUserRes {
-    user: UserSingle;
+    user: UserSingleI;
 }
 
 const rootPath = "/user";
@@ -48,10 +50,10 @@ const usersApiSlice = apiSlice.injectEndpoints({
                 else return [{ type: "User", id: "LIST" }]
             }
         }),
-        getProfile: build.query<GetProfileResponse, void>({
+        getProfile: build.query<GetProfileRes, void>({
             query: () => `${rootPath}/profile`
         }),
-        getUser: build.query<GetUserRes, { userId: string }>({
+        getUser: build.query<GetUserRes, { userId: string | undefined }>({
             query: ({ userId }) => `${rootPath}/single-user?userId=${userId}`,
             providesTags: (result) => {
                 if(result?.user) {
@@ -67,4 +69,5 @@ export const {
     useLazyGetUsersQuery,
     useGetProfileQuery,
     useLazyGetUserQuery,
+    useGetUserQuery,
 } = usersApiSlice;

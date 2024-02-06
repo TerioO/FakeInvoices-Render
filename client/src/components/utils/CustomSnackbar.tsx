@@ -4,25 +4,30 @@ import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 import { IconButton, Snackbar, SnackbarContent } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 
-type Props = { 
+type Props = {
     message: SerializedError | FetchBaseQueryError | undefined | string;
 };
 
-export default function CustomSnackbar({ message }: Props){
+export default function CustomSnackbar({ message }: Props) {
     let msg: string | undefined = "";
     const [open, setOpen] = useState<boolean>(false);
     if (message) {
-        if(typeof message === "string"){
+        if (typeof message === "string") {
             msg = message;
-        }
-        else if ("status" in message) {
-            if ("error" in message) msg = message.error;
-            else {
-                const res = message.data as { message: string; isError: boolean };
+        } else if ("status" in message) {
+            if ("error" in message) {
+                // msg = message.error;
+                msg = "";
+            } else {
+                const res = message.data as {
+                    message: string;
+                    isError: boolean;
+                };
                 msg = res.message;
             }
         } else {
-            msg = message.message;
+            // msg = message.message;
+            msg = "";
         }
     }
 

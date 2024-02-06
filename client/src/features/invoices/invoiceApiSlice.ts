@@ -2,13 +2,17 @@ import { apiSlice } from "../../app/api/apiSlice";
 
 export interface Invoice {
     _id: string;
-    companyName: string;
-    companyCountry: string;
-    phone: string;
-    service: string;
-    userId: string;
-    userEmail: string;
-    userCountry: string;
+    company: {
+        name: string;
+        country: string;
+        phone: string;
+        service: string;
+    };
+    user: {
+        id: string;
+        role: string;
+    };
+    quantity: number;
     dueDate: Date;
     duePay: string;
     isPaid: boolean;
@@ -59,7 +63,7 @@ const invoiceApiSlice = apiSlice.injectEndpoints({
                 return createTags(result);
             }
         }),
-        getUsersInvoices: build.query<GetInvoices, { userId: string }>({
+        getUsersInvoices: build.query<GetInvoices, { userId: string | undefined }>({
             query: ({ userId }) => `${rootPath}/users-invoices?userId=${userId}`,
             providesTags: (result) => {
                 return createTags(result);
@@ -78,5 +82,6 @@ export const {
     useLazyGetAllInvoicesQuery,
     useLazyGetInvoiceQuery,
     useLazyGetMyInvoicesQuery,
-    useLazyGetUsersInvoicesQuery
+    useLazyGetUsersInvoicesQuery,
+    useGetUsersInvoicesQuery,
 } = invoiceApiSlice;

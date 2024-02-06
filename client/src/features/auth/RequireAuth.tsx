@@ -1,5 +1,5 @@
 import { Outlet, Navigate, useLocation } from "react-router-dom";
-import { useAuth, RolesType } from "../../hooks/useAuth";
+import { useAuth, RoleType } from "../../hooks/useAuth";
 import { setGLobalSnackbarMessage } from "../../app/slices/globalSnackbarSlice";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { useEffect } from "react";
@@ -7,7 +7,7 @@ import { selectCurrentToken, setHasLoggedOut } from "./authSlice";
 import { selectHasLoggedOut } from "./authSlice";
 
 type Props = {
-    roles: RolesType;
+    roles: RoleType[];
 };
 
 export default function RequireAuth({ roles }: Props) {
@@ -17,7 +17,7 @@ export default function RequireAuth({ roles }: Props) {
     const location = useLocation();
 
     const token = useAppSelector(selectCurrentToken);
-    const grantAccess = user.roles.some((el) => roles.includes(el));
+    const grantAccess = user.role ? roles.includes(user.role) : false;
 
     useEffect(() => {
         setTimeout(() => {

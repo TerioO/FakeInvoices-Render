@@ -14,6 +14,8 @@ import InvoicesList from "./features/invoices/InvoicesList";
 import MyInvoices from "./features/invoices/MyInvoices";
 import SingleInvoice from "./features/invoices/SingleInvoice";
 import VerifyEmail from "./features/auth/VerifyEmail";
+import About from "./components/Pages/About";
+import UsersInvoices from "./features/invoices/UsersInvoices";
 
 function App() {
     return (
@@ -26,15 +28,17 @@ function App() {
                 <Route element={<PageContainer />}>
                     <Route element={<PersistLogin />}>
                         <Route index element={<Welcome />}></Route>
-                        <Route element={<RequireAuth roles={["USER", "ADMIN", "OWNER"]}/>}>
+                        <Route path="/about" element={<About />}></Route>
+                        <Route element={<RequireAuth roles={["USER", "READER", "OWNER"]}/>}>
                             <Route path="/profile" element={<Profile />}></Route>
                             <Route path="/settings" element={<AccountSettings />}></Route>
                             <Route path="/my-invoices" element={<MyInvoices />}></Route>
                             <Route path="/single-invoice/:userId/:invoiceId" element={<SingleInvoice />}></Route>
                         </Route>
-                        <Route element={<RequireAuth roles={["ADMIN", "OWNER"]}/>}>
+                        <Route element={<RequireAuth roles={["READER", "OWNER"]}/>}>
                             <Route path="/users" element={<UsersList />}></Route>
                             <Route path="/invoices" element={<InvoicesList />}></Route>
+                            <Route path="/invoices/:userId" element={<UsersInvoices />} ></Route>
                         </Route>
                     </Route>
                     

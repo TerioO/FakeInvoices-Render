@@ -2,20 +2,20 @@ import { selectCurrentToken } from "../features/auth/authSlice"
 import { useAppSelector } from "../app/hooks"
 import { jwtDecode } from "jwt-decode"
 
-export type RolesType = ("USER" | "ADMIN" | "OWNER")[];
+export type RoleType = ("USER" | "READER" | "OWNER");
 
 interface JWTPayload {
     UserInfo: {
         id: string,
         firstName: string,
-        roles: RolesType,
+        role: RoleType,
         isVerified: boolean
     }
 }
 
 interface UserInfo {
     firstName: string,
-    roles: RolesType,
+    role: RoleType | undefined,
     status: "NOT LOGGED" | "LOGGED IN",
     isVerified: boolean
 }
@@ -24,7 +24,7 @@ export const useAuth = () => {
     const token = useAppSelector(selectCurrentToken);
     const returnValue: UserInfo = {
         firstName: "",
-        roles: [],
+        role: undefined,
         status: "NOT LOGGED",
         isVerified: false
     }
@@ -32,7 +32,7 @@ export const useAuth = () => {
     if(token) {
         const decoded = jwtDecode<JWTPayload>(token);
         returnValue.firstName = decoded.UserInfo.firstName;
-        returnValue.roles = decoded.UserInfo.roles;
+        returnValue.role = decoded.UserInfo.role;
         returnValue.status = "LOGGED IN";
         returnValue.isVerified = decoded.UserInfo.isVerified
     }
