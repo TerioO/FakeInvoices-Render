@@ -12,7 +12,6 @@ const env = cleanEnv(process.env, {
     DOMAINS_DEV: str({ default: "http://localhost:5173&&http://localhost:4173" }),
     DOMAINS_PROD: str(),
     DOMAIN_CLIENT_PROD: str(),
-    EMAIL_PASS: str(),
     EMAIL_USER: str(),
     EMAIL_TOKEN_SECRET: str(),
     EMAIL_API_KEY: str(),

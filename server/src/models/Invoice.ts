@@ -1,22 +1,28 @@
-import mongoose from "mongoose";
+import mongoose, { FlattenMaps } from "mongoose";
 
-
-const FakeCompany = {
+export const FakeCompany = {
     name: "RaptureElectronics",
     country: "France",
     phone: "+33/---------/",
     service: "RaptureOS",
-    duePay: "10$"
+    price: {
+        value: 10,
+        denomination: "$"
+    }
 };
 
 export interface InvoiceInterface {
-    companyName: string;
-    companyCountry: string;
-    phone: string;
-    service: string;
-    userId: mongoose.Types.ObjectId;
-    userEmail: string;
-    userCountry: string;
+    company: {
+        name: string;
+        country: string;
+        phone: string;
+        service: string;
+    };
+    user: {
+        id: mongoose.Types.ObjectId;
+        role: string;
+    };
+    quantity: number;
     dueDate: Date;
     duePay: string;
     isPaid: boolean;
@@ -24,39 +30,52 @@ export interface InvoiceInterface {
     updatedAt: Date;
 }
 
+export interface InvoiceFlatInterface extends FlattenMaps<InvoiceInterface> {
+    _id: mongoose.Types.ObjectId;
+}
+
 export interface InvoiceCreateInterface {
-    userId: string;
+    user: {
+        id: string;
+        role: string;
+    }
+    quantity: number;
     dueDate: Date;
+    duePay: string;
     isPaid: boolean;
 }
 
 const invoiceSchema = new mongoose.Schema({
-    companyName: {
-        type: String,
-        default: FakeCompany.name
+    company: {
+        name: {
+            type: String,
+            default: FakeCompany.name
+        },
+        country: {
+            type: String,
+            default: FakeCompany.country
+        },
+        phone: {
+            type: String,
+            default: FakeCompany.phone
+        },
+        service: {
+            type: String,
+            default: FakeCompany.service
+        }
     },
-    companyCountry: {
-        type: String,
-        default: FakeCompany.country
+    user: {
+        id: {
+            type: mongoose.Types.ObjectId,
+            required: true
+        },
+        role: {
+            type: String,
+            required: true
+        }
     },
-    phone: {
-        type: String,
-        default: FakeCompany.phone
-    },
-    service: {
-        type: String,
-        default: FakeCompany.service
-    },
-    userId: {
-        type: mongoose.Types.ObjectId,
-        required: true,
-    },
-    userEmail: {
-        type: String,
-        required: true
-    },
-    userCountry: {
-        type: String,
+    quantity: {
+        type: Number,
         required: true
     },
     dueDate: {
@@ -65,7 +84,7 @@ const invoiceSchema = new mongoose.Schema({
     },
     duePay: {
         type: String,
-        default: FakeCompany.duePay
+        required: true
     },
     isPaid: {
         type: Boolean,

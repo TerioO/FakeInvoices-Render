@@ -1,4 +1,5 @@
-import mongoose from "mongoose";
+import mongoose, { FlattenMaps } from "mongoose";
+import { ROLES } from "../middleware/verifyRoles";
 
 export interface UserInterface {
     firstName: string,
@@ -7,10 +8,17 @@ export interface UserInterface {
     email: string,
     phone: string,
     password: string,
-    roles: string[],
-    isVerified: boolean,
+    role: string,
+    verification: {
+        isVerified: boolean;
+        emailSentAt: Date;
+    }
     createdAt: Date,
     updatedAt: Date
+}
+
+export interface UserLeanInterface extends FlattenMaps<UserInterface> {
+    _id: mongoose.Types.ObjectId;
 }
 
 export interface UserCreateInterface {
@@ -19,7 +27,12 @@ export interface UserCreateInterface {
     country: string,
     email: string,
     phone: string,
-    password: string
+    password: string,
+    role?: string,
+    verification?: {
+        isVerified?: boolean
+        emailSetnAt?: Date
+    }
 }
 
 const userSchema = new mongoose.Schema({
@@ -48,13 +61,19 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    roles: {
-        type: [String],
-        default: "USER"
+    role: {
+        type: String,
+        default: ROLES.user
     },
-    isVerified: {
-        type: Boolean,
-        default: false
+    verification: {
+        isVerified: {
+            type: Boolean,
+            required: true,
+            default: false
+        },
+        emailSentAt: {
+            type: Date
+        }
     }
 }, { timestamps: true });
 

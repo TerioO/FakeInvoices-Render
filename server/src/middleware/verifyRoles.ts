@@ -1,22 +1,22 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Request, Response, NextFunction } from "express";
-import { ResLocals } from "../controllers/authController";
+import { ResLocals } from "../controllers/helpers/createTokens";
 import createHttpError from "http-errors";
 
 export const ROLES = {
     owner: "OWNER",
-    admin: "ADMIN",
+    reader: "READER",
     user: "USER"
 };
 
 export const verifyRoles = (allowedRoles: string[]) => {
     return (req: Request, res: Response<unknown, ResLocals>, next: NextFunction) => {
-        if (!res.locals.roles) {
-            return next(createHttpError(403, "Forbidden: user doesn't have roles assigned"));
+        const userRole = res.locals.role;
+        if (!userRole) {
+            return next(createHttpError(403, "Forbidden: user doesn't have role assigned"));
         }
-        const userRoles = [...res.locals.roles];
-        const allowed = userRoles.some((el) => allowedRoles.includes(el));
-        if(!allowed) return next(createHttpError(403, "Forbidden: user doesn't have the necessary role to access resource"));
+        const allowed = allowedRoles.includes(userRole);
+        if(!allowed) return next(createHttpError(400, "Forbidden: user doesn't have the necessary role to access resource"));
         next();
     };
 };

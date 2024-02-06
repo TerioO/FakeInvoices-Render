@@ -2,7 +2,7 @@ import express from "express";
 import * as handlers from "../controllers/userController";
 import { verifyJWT } from "../middleware/verifyJWT";
 import { verifyRoles, ROLES } from "../middleware/verifyRoles";
-import { checkEnv } from "../middleware/checkDev";
+import { checkEnv } from "../middleware/checkEnv";
 
 const router = express.Router();
 
@@ -12,9 +12,8 @@ router.route("/allUsers")
 router.use(verifyJWT);
 
 router.get("/all-users-owner", verifyRoles([ROLES.owner]), handlers.getAllUsers);
-router.get("/all-users", verifyRoles([ROLES.admin, ROLES.owner]), handlers.getUsers);
-router.get("/single-user", handlers.getUser); // Role verification done in req handler bcs a "USER" should be able to get this.
+router.get("/all-users", verifyRoles([ROLES.reader, ROLES.owner]), handlers.getUsers);
+router.get("/single-user", handlers.getUser);
 router.get("/profile", handlers.getProfile);
-
 
 export default router;
