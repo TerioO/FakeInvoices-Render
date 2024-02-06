@@ -6,8 +6,8 @@ import { ROLES } from "../middleware/verifyRoles";
 import { validateObjectId } from "../constants/validateObjectId";
 import PdfPrinter from "pdfmake";
 import { TDocumentDefinitions } from "pdfmake/interfaces";
-import { RobotoFont } from "../constants/fonts/Roboto";
 import User from "../models/User";
+import { pdfmakeFonts } from "../constants/fonts";
 
 interface InvoiceUpdateReq {
     invoiceId: string;
@@ -168,29 +168,29 @@ export const getMyInvoices = async (req: Request, res: Response<unknown, ResLoca
 };
 
 export const getInvoicePDF = async (req: Request<unknown, unknown, unknown, { invoiceId: string; userId: string }>, res: Response<unknown, ResLocals>, next: NextFunction) => {
-    const { invoiceId, userId  } = req.query;
+    const { invoiceId, userId } = req.query;
     const { id, role } = res.locals;
     try {
-        if(!invoiceId) throw createHttpError(400, "invoiceId required");
-        if(!id) throw createHttpError(401, "User not authenitcated");
+        if (!invoiceId) throw createHttpError(400, "invoiceId required");
+        if (!id) throw createHttpError(401, "User not authenitcated");
 
         const user = await User.findById(userId).lean().exec();
-        if(!user) throw createHttpError(404, "User not found");
+        if (!user) throw createHttpError(404, "User not found");
 
         const invoice = await Invoice.findById(invoiceId).lean().exec();
-        if(!invoice) throw createHttpError(404, "Invoice not found");
-        if(invoice.user.id.toString() !== userId) throw createHttpError(400, "Invalid userId-invoiceId pair");
+        if (!invoice) throw createHttpError(404, "Invoice not found");
+        if (invoice.user.id.toString() !== userId) throw createHttpError(400, "Invalid userId-invoiceId pair");
 
-        if(role === ROLES.user){
-            if(user._id.toString() !== id) throw createHttpError(400, "User not found");
-            if(invoice.user.id.toString() !== id) throw createHttpError(400, "Invoice not found");
+        if (role === ROLES.user) {
+            if (user._id.toString() !== id) throw createHttpError(400, "User not found");
+            if (invoice.user.id.toString() !== id) throw createHttpError(400, "Invoice not found");
         }
-        else if(role === ROLES.reader){
-            if(user.role === ROLES.owner || user.role === ROLES.reader && user._id.toString() !== id) throw createHttpError(400, "User not found");
-            if(invoice.user.role === ROLES.owner || invoice.user.role === ROLES.reader && invoice.user.id.toString() !== id) throw createHttpError(400, "Invoice not found");
+        else if (role === ROLES.reader) {
+            if (user.role === ROLES.owner || user.role === ROLES.reader && user._id.toString() !== id) throw createHttpError(400, "User not found");
+            if (invoice.user.role === ROLES.owner || invoice.user.role === ROLES.reader && invoice.user.id.toString() !== id) throw createHttpError(400, "Invoice not found");
         }
 
-        const printer = new PdfPrinter(RobotoFont);
+        const printer = new PdfPrinter(pdfmakeFonts);
 
         const docDefinition: TDocumentDefinitions = {
             content: [
@@ -202,7 +202,10 @@ export const getInvoicePDF = async (req: Request<unknown, unknown, unknown, { in
                 "**********************************************************************************************",
                 "Invoice data: ",
                 JSON.stringify(invoice, null, 2)
-            ]
+            ],
+            defaultStyle: {
+                font: "Helvetica"
+            }
         };
 
         const pdfDoc = printer.createPdfKitDocument(docDefinition);
