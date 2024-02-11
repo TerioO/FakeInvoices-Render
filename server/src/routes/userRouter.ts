@@ -16,4 +16,7 @@ router.get("/all-users", verifyRoles([ROLES.reader, ROLES.owner]), handlers.getU
 router.get("/single-user", handlers.getUser);
 router.get("/profile", handlers.getProfile);
 
+router.patch("/update-user", verifyRoles([ROLES.owner]), handlers.updateUser);
+router.patch("/update-my-account", handlers.updateMyAccount);
+
 export default router;

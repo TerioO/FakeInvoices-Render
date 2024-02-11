@@ -1,9 +1,13 @@
 import { Request, Response, NextFunction, RequestHandler } from "express";
 import User from "../models/User";
 import createHttpError from "http-errors";
+import bcrypt from "bcrypt";
 import { ResLocals } from "./helpers/createTokens";
 import { ROLES } from "../middleware/verifyRoles";
 import { validateObjectId } from "../constants/validateObjectId";
+import { appConfig } from "../config/appConfig";
+import { PASSWORD_REGEX } from "../constants/regex";
+import Invoice from "../models/Invoice";
 
 // [GET] ------------------------------------------------------------------------------------[GET]------------------------------------------------------------------------------
 
@@ -38,7 +42,7 @@ export const getUsers = async (req: Request<unknown, unknown, unknown, { limit: 
     if (!isNaN(parseInt(page)) && parseInt(page) > 1) p = parseInt(page);
     try {
         let query = { role: { $in: [ROLES.user] } };
-        if(role === ROLES.owner) query = { role: { $in: [ROLES.user, ROLES.reader ]}};
+        if (role === ROLES.owner) query = { role: { $in: [ROLES.user, ROLES.reader] } };
         const users = await User.find(query)
             .limit(l)
             .skip((p - 1) * l)
@@ -92,16 +96,90 @@ export const getUser = async (req: Request<unknown, unknown, unknown, { userId: 
         if (!user) throw createHttpError(404, "User not found");
 
         // Permission check:
-        if(role === ROLES.user && res.locals.id !== userId) throw createHttpError(400, `${ROLES.user} can't access other users entries`);
-        else if(role === ROLES.reader){
-            if([ROLES.owner].includes(user.role)){
+        if (role === ROLES.user && res.locals.id !== userId) throw createHttpError(400, `${ROLES.user} can't access other users entries`);
+        else if (role === ROLES.reader) {
+            if ([ROLES.owner].includes(user.role)) {
                 throw createHttpError(400, "Access not allowed by user role");
             }
-            else if([ROLES.reader].includes(user.role) && userId != id){
+            else if ([ROLES.reader].includes(user.role) && userId != id) {
                 throw createHttpError(400, "Access not allowed by user role");
             }
         }
         res.status(200).json({ user });
+    }
+    catch (error) {
+        next(error);
+    }
+};
+
+// [PATCH] ------------------------------------------------------------------------------------[PATCH]------------------------------------------------------------------------------
+
+interface UpdateUserReqBody {
+    userId: string;
+    role: string;
+    password: string;
+    email: string;
+}
+
+/**
+ * Update a user, should only be available for OWNERs
+ */
+export const updateUser = async (req: Request<unknown, unknown, UpdateUserReqBody, unknown>, res: Response, next: NextFunction) => {
+    const { userId, role, email, password } = req.body;
+    try {
+        // Validation:
+        if (!userId) throw createHttpError(400, "userId required");
+        validateObjectId(userId);
+        if (!role && !password && !email) throw createHttpError(400, "role or email or password required");
+
+        const foundUser = await User.findById(userId);
+        if (!foundUser) throw createHttpError(404, "User not found");
+        if (foundUser.role === ROLES.owner) throw createHttpError(400, "Cannot update this user");
+        if (Object.values(ROLES).includes(role)){
+            foundUser.role = role;
+            await Invoice.updateMany({ "user.id": userId }, { $set: { "user.role": role }});
+        }
+        if (password) {
+            const newPass = await bcrypt.hash(password, appConfig.saltRounds);
+            foundUser.password = newPass;
+        }
+        if (email) {
+            const alreadyUsed = await User.findOne({ email }).lean().exec();
+            if(alreadyUsed) throw createHttpError(400, "Email already used");
+            foundUser.email = email;
+            foundUser.verification.isVerified = false;
+        }
+        await foundUser.save();
+        res.status(200).json({ message: `User - ${foundUser._id.toString()} updated!` });
+    }
+    catch (error) {
+        next(error);
+    }
+};
+
+interface UpdateMyAccountReqBody {
+    newPassword: string;
+    currentPassword: string;
+}
+
+export const updateMyAccount = async (req: Request<unknown, unknown, UpdateMyAccountReqBody, unknown>, res: Response<unknown, ResLocals>, next: NextFunction) => {
+    const { id } = res.locals;
+    const { newPassword, currentPassword } = req.body;
+    try {
+        if (!id) throw createHttpError(401, "Not logged in");
+        if (!newPassword || !currentPassword) throw createHttpError(400, "newPassword, currentPassword required");
+        if (!PASSWORD_REGEX.test(newPassword)) throw createHttpError(400, "Password not strong enough");
+
+        const foundUser = await User.findById(id);
+        if (!foundUser) throw createHttpError(404, "User not found");
+
+        const passwordMatch = await bcrypt.compare(currentPassword, foundUser.password);
+        if (!passwordMatch) throw createHttpError(400, "Current Password doesn't match original");
+
+        const newPass = await bcrypt.hash(newPassword, appConfig.saltRounds);
+        foundUser.password = newPass;
+        await foundUser.save();
+        res.status(200).json({ message: "Account updated!" });
     }
     catch (error) {
         next(error);

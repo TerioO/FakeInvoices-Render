@@ -26,12 +26,24 @@ interface GetUsersRes {
     usersArrayLength: number;
 }
 
-interface GetProfileRes{
+interface GetProfileRes {
     profile: UserI;
 }
 
 interface GetUserRes {
     user: UserSingleI;
+}
+
+export interface UpdateUserPayload {
+    userId: string | undefined,
+    role: RoleType | undefined,
+    password: string | undefined,
+    email: string | undefined
+}
+
+export interface UpdateMyAccountPayload {
+    newPassword: string,
+    currentPassword: string
 }
 
 const rootPath = "/user";
@@ -41,10 +53,10 @@ const usersApiSlice = apiSlice.injectEndpoints({
         getUsers: build.query<GetUsersRes, { limit?: number, page?: number }>({
             query: ({ limit, page }) => `${rootPath}/all-users?limit=${limit}&page=${page}`,
             providesTags: (result) => {
-                if(result?.users) {
+                if (result?.users) {
                     return [
                         { type: "User", id: "LIST" },
-                        ...result.users.map(({ _id }) => ({ type: "User" as const, id: _id}))
+                        ...result.users.map(({ _id }) => ({ type: "User" as const, id: _id }))
                     ]
                 }
                 else return [{ type: "User", id: "LIST" }]
@@ -56,11 +68,26 @@ const usersApiSlice = apiSlice.injectEndpoints({
         getUser: build.query<GetUserRes, { userId: string | undefined }>({
             query: ({ userId }) => `${rootPath}/single-user?userId=${userId}`,
             providesTags: (result) => {
-                if(result?.user) {
+                if (result?.user) {
                     return [{ type: "User" as const, id: result.user._id }]
                 }
                 else return [{ type: "User" as const, id: "LIST" }];
             }
+        }),
+        updateUser: build.mutation<{ message: string }, UpdateUserPayload>({
+            query: (payload) => ({
+                url: `${rootPath}/update-user`,
+                method: "PATCH",
+                body: payload
+            }),
+            invalidatesTags: (_result, _error, arg) => [{ type: "User" as const, id: arg.userId }]
+        }),
+        updateMyAccount: build.mutation<{ message: string }, UpdateMyAccountPayload>({
+            query: (payload) => ({
+                url: `${rootPath}/update-my-account`,
+                method: "PATCH",
+                body: payload
+            })
         })
     })
 })
@@ -70,4 +97,6 @@ export const {
     useGetProfileQuery,
     useLazyGetUserQuery,
     useGetUserQuery,
+    useUpdateMyAccountMutation,
+    useUpdateUserMutation
 } = usersApiSlice;

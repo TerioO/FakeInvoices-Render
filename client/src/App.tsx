@@ -16,33 +16,38 @@ import SingleInvoice from "./features/invoices/SingleInvoice";
 import VerifyEmail from "./features/auth/VerifyEmail";
 import About from "./components/Pages/About";
 import UsersInvoices from "./features/invoices/UsersInvoices";
+import Requests from "./features/users/requests/Requests";
+import CheckServerOn from "./components/Pages/CheckServerOn";
 
 function App() {
     return (
         <Routes>
             <Route path="/" element={<Layout />}>
-                <Route path="/login" element={<Login />}></Route>
-                <Route path="/register" element={<Register />}></Route>
-                <Route path="/verify/:emailToken" element={<VerifyEmail />}></Route>
+                <Route element={<CheckServerOn />}>
+                    <Route path="/login" element={<Login />}></Route>
+                    <Route path="/register" element={<Register />}></Route>
+                    <Route path="/verify/:emailToken" element={<VerifyEmail />}></Route>
 
-                <Route element={<PageContainer />}>
-                    <Route element={<PersistLogin />}>
-                        <Route index element={<Welcome />}></Route>
-                        <Route path="/about" element={<About />}></Route>
-                        <Route element={<RequireAuth roles={["USER", "READER", "OWNER"]}/>}>
-                            <Route path="/profile" element={<Profile />}></Route>
-                            <Route path="/settings" element={<AccountSettings />}></Route>
-                            <Route path="/my-invoices" element={<MyInvoices />}></Route>
-                            <Route path="/single-invoice/:userId/:invoiceId" element={<SingleInvoice />}></Route>
+                    <Route element={<PageContainer />}>
+                        <Route element={<PersistLogin />}>
+                            <Route index element={<Welcome />}></Route>
+                            <Route path="/about" element={<About />}></Route>
+                            <Route element={<RequireAuth roles={["USER", "READER", "OWNER"]}/>}>
+                                <Route path="/profile" element={<Profile />}></Route>
+                                <Route path="/settings" element={<AccountSettings />}></Route>
+                                <Route path="/my-invoices" element={<MyInvoices />}></Route>
+                                <Route path="/single-invoice/:userId/:invoiceId" element={<SingleInvoice />}></Route>
+                                <Route path="/requests" element={<Requests />}></Route>
+                            </Route>
+                            <Route element={<RequireAuth roles={["READER", "OWNER"]}/>}>
+                                <Route path="/users" element={<UsersList />}></Route>
+                                <Route path="/invoices" element={<InvoicesList />}></Route>
+                                <Route path="/invoices/:userId" element={<UsersInvoices />} ></Route>
+                            </Route>
                         </Route>
-                        <Route element={<RequireAuth roles={["READER", "OWNER"]}/>}>
-                            <Route path="/users" element={<UsersList />}></Route>
-                            <Route path="/invoices" element={<InvoicesList />}></Route>
-                            <Route path="/invoices/:userId" element={<UsersInvoices />} ></Route>
-                        </Route>
+                        
+                        <Route path="*" element={<_404 />}></Route>
                     </Route>
-                    
-                    <Route path="*" element={<_404 />}></Route>
                 </Route>
             </Route>
         </Routes>

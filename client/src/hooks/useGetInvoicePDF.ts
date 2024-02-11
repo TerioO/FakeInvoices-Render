@@ -45,7 +45,7 @@ export const useGetInvoicePDF = ({ invoiceId, userId }: Payload) => {
                 }
             }
             catch(error){
-                console.log(error)
+                if(import.meta.env.DEV) console.log(error)
             }
             finally {
                 setIsLoading(false);

@@ -53,7 +53,7 @@ const invoiceApiSlice = apiSlice.injectEndpoints({
                 const tags = [{
                     type: "Invoice" as const, id: "LIST"
                 }]
-                if (result?.invoice) tags.push({ type: "Invoice" as const, id: result.invoice._id});
+                if (result?.invoice) tags.push({ type: "Invoice" as const, id: result.invoice._id });
                 return tags;
             }
         }),
@@ -74,6 +74,9 @@ const invoiceApiSlice = apiSlice.injectEndpoints({
             providesTags: (result) => {
                 return createTags(result);
             }
+        }),
+        getInvoicePDFtoEmail: build.query<{ message: string }, { invoiceId: string | undefined; userId: string | undefined }>({
+            query: ({ userId, invoiceId }) => `${rootPath}/invoice-pdf-email?userId=${userId}&invoiceId=${invoiceId}`
         })
     })
 })
@@ -84,4 +87,5 @@ export const {
     useLazyGetMyInvoicesQuery,
     useLazyGetUsersInvoicesQuery,
     useGetUsersInvoicesQuery,
+    useLazyGetInvoicePDFtoEmailQuery,
 } = invoiceApiSlice;

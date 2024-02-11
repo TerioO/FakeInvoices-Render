@@ -3,9 +3,11 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import { corsOptions } from "./config/corsOptions";
 import { errorHandler } from "./middleware/errorHandler";
+import { checkIfServerOn } from "./middleware/checkServer";
 import authRouter from "./routes/authRouter";
 import userRouter from "./routes/userRouter";
 import invoiceRouter from "./routes/invoiceRouter";
+import userRequestRouter from "./routes/userRequestRouter";
 
 export const createApp = () => {
     const app = express();
@@ -19,9 +21,11 @@ export const createApp = () => {
     app.get("/", (req, res) => {
         res.status(200).send("Hello, work in progress...");
     });
+    app.get("/serverOn", checkIfServerOn);
     app.use("/auth", authRouter);
     app.use("/user", userRouter);
     app.use("/invoice", invoiceRouter);
+    app.use("/user-requests", userRequestRouter);
 
     app.all("*", (req, res) => {
         res.status(404);

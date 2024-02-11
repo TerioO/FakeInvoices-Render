@@ -3,6 +3,7 @@ import env from "../../config/env";
 import { UserLeanInterface } from "../../models/User";
 import { Request } from "express";
 import { appConfig } from "../../config/appConfig";
+import { validateEmail } from "../../constants/emailDomains";
 
 export interface EmailPayload {
     subject: string;
@@ -31,6 +32,8 @@ export const sendVerificationEmail = async (user: UserLeanInterface, req: Reques
     let dt: number = 0;
     let mm;
     let ss;
+    // Just in case do a check here as well:
+    if (!validateEmail) return { status: 400, message: "Could not send email, invalid email address" };
     if (!verification.emailSentAt) {
         canSend = true;
     }
@@ -89,7 +92,7 @@ export const sendVerificationEmail = async (user: UserLeanInterface, req: Reques
         if (response.ok) {
             return {
                 status: 200,
-                message: "Verification email sent"
+                message: "Verification email sent, check inbox/spam"
             };
         }
     }

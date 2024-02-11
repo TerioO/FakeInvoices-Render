@@ -49,7 +49,15 @@ const baseQueryWithReauth: BaseQueryFn<
 export const apiSlice = createApi({
     reducerPath: 'api',
     baseQuery: baseQueryWithReauth,
-    tagTypes: ["User", "Invoice"],
+    tagTypes: ["User", "Invoice", "U-Request"],
     keepUnusedDataFor,
-    endpoints: () => ({})
+    endpoints: (build) => ({
+        getCheckServerOn: build.query<{ message: string }, void>({
+            query: () => "/serverOn"
+        })
+    })
 })
+
+export const {
+    useGetCheckServerOnQuery
+} = apiSlice

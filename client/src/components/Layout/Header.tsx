@@ -30,6 +30,12 @@ export default function Header() {
             <NavLink to="/my-invoices" onClick={handleCloseDrawer}>
                 MY INVOICES
             </NavLink>
+            <NavLink to="/about" onClick={handleCloseDrawer}>
+                ABOUT
+            </NavLink>
+            <NavLink to="/requests" onClick={handleCloseDrawer}>
+                REQUESTS
+            </NavLink>
         </div>
     );
 
@@ -54,6 +60,7 @@ export default function Header() {
                 <NavLink to="/invoices">INVOICES</NavLink>
                 <NavLink to="/my-invoices">MY INVOICES</NavLink>
                 <NavLink to="/about">ABOUT</NavLink>
+                <NavLink to="/requests">REQUESTS</NavLink>
                 <AvatarMenu />
             </div>
             <Drawer anchor="left" open={drawerOpen} onClose={handleCloseDrawer}>

@@ -1,48 +1,36 @@
 import s from "../../styles/Auth.module.scss";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import {
     useRegisterMutation,
     useLoginMutation,
     RegisterPayload,
 } from "./authApiSlice";
-import { useAppDispatch } from "../../app/hooks";
+import {
+    setRegisterForm,
+    selectRegisterForm,
+    resetRegisterForm,
+} from "./authSlice";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { setGLobalSnackbarMessage } from "../../app/slices/globalSnackbarSlice";
-import { NavLink, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useGetErrorMessage } from "../../hooks/useGetErrorMessage";
 import PasswordInput from "../../components/utils/PasswordInput";
 import TextInput from "../../components/utils/TextInput";
 import { Button, LinearProgress, Autocomplete, TextField } from "@mui/material";
 import { COUNTRIES } from "../../constants/countries";
-import { PASSWORD_REGEX, NAME_REGEX } from "../../constants/regex";
-
-interface FormState extends RegisterPayload {
-    errorFirstName: boolean;
-    errorLastName: boolean;
-    errorPassword: boolean;
-}
-
-const initialFormState: FormState = {
-    firstName: "",
-    lastName: "",
-    email: "",
-    password: "",
-    country: COUNTRIES[180],
-    phone: "",
-    errorFirstName: false,
-    errorLastName: false,
-    errorPassword: false,
-};
+import PasswordErrorMessages from "../../components/utils/PasswordErrorMessages";
 
 export default function Register() {
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
-    const [form, setForm] = useState<FormState>(initialFormState);
+    const form = useAppSelector(selectRegisterForm);
     const [
         register,
         {
             isLoading: isRegisterLoading,
             error: registerError,
             isSuccess: isRegisterSuccess,
+            isError: isRegisterError,
         },
     ] = useRegisterMutation();
     const [
@@ -60,52 +48,36 @@ export default function Register() {
 
     const handleFormUpdate = (
         e: React.ChangeEvent<HTMLInputElement>,
-        property: keyof FormState
+        property: keyof RegisterPayload
     ) => {
-        if (property === "firstName") {
-            setForm((prev) => ({
-                ...prev,
-                [property]:
-                    e.target.value.charAt(0).toUpperCase() +
-                    e.target.value.slice(1),
-                errorFirstName: !NAME_REGEX.test(e.target.value)
-            }));
-        } else if (property === "lastName") {
-            setForm((prev) => ({
-                ...prev,
-                [property]:
-                    e.target.value.charAt(0).toUpperCase() +
-                    e.target.value.slice(1),
-                errorLastName: !NAME_REGEX.test(e.target.value)
-            }));
-        } else if (property === "password") {
-            setForm((prev) => ({
-                ...prev,
-                [property]: e.target.value,
-                errorPassword: !PASSWORD_REGEX.test(e.target.value),
-            }));
-        } else setForm((prev) => ({ ...prev, [property]: e.target.value }));
+        dispatch(setRegisterForm({ value: e.target.value, property }));
     };
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         try {
-            await register(form).unwrap();
-            await login(form).unwrap();
+            await register(form);
+            await login(form);
         } catch (error) {
             //
         }
     };
 
     useEffect(() => {
-        if (isLoginError) {
+        if (isRegisterError) {
+            // Do nothing, don't navigate away
+        } else if (isLoginError) {
             dispatch(
                 setGLobalSnackbarMessage(
                     loginErrorMsg || "Login: unknown error"
                 )
             );
+            dispatch(resetRegisterForm({ keepLoginData: true }));
             navigate("/login");
-        } else if (isLoginSuccess && isRegisterSuccess) navigate("/");
+        } else if (isLoginSuccess && isRegisterSuccess) {
+            dispatch(resetRegisterForm({ keepLoginData: false }));
+            navigate("/");
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isLoginError, isRegisterSuccess, isLoginSuccess]);
 
@@ -120,6 +92,11 @@ export default function Register() {
                     value={form.firstName}
                     onChange={(e) => handleFormUpdate(e, "firstName")}
                 />
+                {form.errorFirstName && (
+                    <p className={s.errorText}>
+                        Minimum 2 characters from [a-Z]
+                    </p>
+                )}
                 <TextInput
                     label="Last Name"
                     required
@@ -127,17 +104,35 @@ export default function Register() {
                     value={form.lastName}
                     onChange={(e) => handleFormUpdate(e, "lastName")}
                 />
+                {form.errorLastName && (
+                    <p className={s.errorText}>
+                        Minimum 2 characters from [a-Z]
+                    </p>
+                )}
                 <TextInput
                     label="Email"
                     type="email"
+                    error={form.errorEmail}
                     required
                     value={form.email}
                     onChange={(e) => handleFormUpdate(e, "email")}
                 />
+                {form.errorEmail && (
+                    <p className={s.errorText}>
+                        Must be valid email, check allowed email domains in{" "}
+                        <Link to="/about" target="_blank">
+                            About
+                        </Link>{" "}
+                    </p>
+                )}
                 <PasswordInput
                     value={form.password}
                     error={form.errorPassword}
                     onChange={(e) => handleFormUpdate(e, "password")}
+                />
+                <PasswordErrorMessages
+                    password={form.password}
+                    shouldDisplay={form.errorPassword}
                 />
                 <Autocomplete
                     options={COUNTRIES}
@@ -151,10 +146,12 @@ export default function Register() {
                     )}
                     value={form.country}
                     onChange={(_e, value) =>
-                        setForm((prev) => ({
-                            ...prev,
-                            country: value as string,
-                        }))
+                        dispatch(
+                            setRegisterForm({
+                                value: value as string,
+                                property: "country",
+                            })
+                        )
                     }
                 />
                 <TextInput
@@ -163,7 +160,10 @@ export default function Register() {
                     value={form.phone}
                     onChange={(e) => handleFormUpdate(e, "phone")}
                 />
-                <p>{errorMsg}</p>
+                {form.errorPhone && (
+                    <p className={s.errorText}>Must contain 10 digits</p>
+                )}
+                <p className="errorTRUE">{errorMsg}</p>
                 <Button
                     disabled={isRegisterLoading || isLoginLoading}
                     type="submit"

@@ -5,9 +5,11 @@ import { ResLocals } from "./helpers/createTokens";
 import { ROLES } from "../middleware/verifyRoles";
 import { validateObjectId } from "../constants/validateObjectId";
 import PdfPrinter from "pdfmake";
-import { TDocumentDefinitions } from "pdfmake/interfaces";
 import User from "../models/User";
 import { pdfmakeFonts } from "../constants/fonts";
+import { createInvoicePDF } from "./helpers/createInvoicePDF";
+import env from "../config/env";
+import { validateEmail } from "../constants/emailDomains";
 
 interface InvoiceUpdateReq {
     invoiceId: string;
@@ -190,30 +192,92 @@ export const getInvoicePDF = async (req: Request<unknown, unknown, unknown, { in
             if (invoice.user.role === ROLES.owner || invoice.user.role === ROLES.reader && invoice.user.id.toString() !== id) throw createHttpError(400, "Invoice not found");
         }
 
+        // PDF creation:
         const printer = new PdfPrinter(pdfmakeFonts);
-
-        const docDefinition: TDocumentDefinitions = {
-            content: [
-                `User - ${user.firstName}, ${user.lastName}`,
-                `Invoice - ${invoice._id.toString()}`,
-                "**********************************************************************************************",
-                "User data: ",
-                JSON.stringify(user, null, 2),
-                "**********************************************************************************************",
-                "Invoice data: ",
-                JSON.stringify(invoice, null, 2)
-            ],
-            defaultStyle: {
-                font: "Helvetica"
-            }
-        };
-
+        const docDefinition = createInvoicePDF(user, invoice);
         const pdfDoc = printer.createPdfKitDocument(docDefinition);
         pdfDoc.pipe(res);
         res.setHeader("Content-Type", "application/pdf");
-        res.setHeader("Content-Disposition", "inline; filename=sample.pdf");
+        res.setHeader("Content-Disposition", "inline");
         // End the response after piping the PDF
         pdfDoc.end();
+    }
+    catch (error) {
+        next(error);
+    }
+};
+
+export const getInvoicePDFtoEmail = async (req: Request<unknown, unknown, unknown, { invoiceId: string; userId: string }>, res: Response<unknown, ResLocals>, next: NextFunction) => {
+    const { invoiceId, userId } = req.query;
+    const { id, role } = res.locals;
+    try {
+        if (!invoiceId) throw createHttpError(400, "invoiceId required");
+        if (!id) throw createHttpError(401, "User not authenitcated");
+
+        const user = await User.findById(userId).lean().exec();
+        if (!user) throw createHttpError(404, "User not found");
+        // For fake users:
+        if (!validateEmail(user.email)) throw createHttpError(400, "Invalid email");
+
+        const invoice = await Invoice.findById(invoiceId).lean().exec();
+        if (!invoice) throw createHttpError(404, "Invoice not found");
+        if (invoice.user.id.toString() !== userId) throw createHttpError(400, "Invalid userId-invoiceId pair");
+
+        if (role === ROLES.user) {
+            if (user._id.toString() !== id) throw createHttpError(400, "User not found");
+            if (invoice.user.id.toString() !== id) throw createHttpError(400, "Invoice not found");
+        }
+        else if (role === ROLES.reader) {
+            if (user.role === ROLES.owner || user.role === ROLES.reader && user._id.toString() !== id) throw createHttpError(400, "User not found");
+            if (invoice.user.role === ROLES.owner || invoice.user.role === ROLES.reader && invoice.user.id.toString() !== id) throw createHttpError(400, "Invoice not found");
+        }
+
+        const docDefinition = createInvoicePDF(user, invoice);
+
+        const printer = new PdfPrinter(pdfmakeFonts);
+        const pdfBuffer = await new Promise<Buffer>((resolve) => {
+            const chunks: Uint8Array[] = [];
+            const pdfDoc = printer.createPdfKitDocument(docDefinition);
+            pdfDoc.on("data", (chunk) => chunks.push(chunk));
+            pdfDoc.on("end", () => resolve(Buffer.concat(chunks)));
+            pdfDoc.end();
+        });
+
+        // Convert PDF buffer to base64
+        const pdfBase64 = pdfBuffer.toString("base64");
+
+        const payload = {
+            sender: {
+                name: "Terio - Fake Invoices",
+                email: env.EMAIL_USER
+            },
+            to: [{
+                name: user.firstName,
+                email: user.email
+            }],
+            subject: "PDF document of your invoice",
+            textContent: "The PDF document you requested:",
+            attachment: [
+                {
+                    content: pdfBase64,
+                    name: `Invoice_${invoice._id.toString().substring(18)}.pdf`
+                }
+            ]
+        };
+
+        const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+            headers: {
+                "Content-Type": "application/json",
+                "api-key": env.EMAIL_API_KEY,
+                "Accept": "application/json"
+            },
+            method: "POST",
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) return res.status(400).json({ message: "Failed to send email" });
+
+        res.status(200).json({ message: "PDF sent to email, check inbox/spam" });
     }
     catch (error) {
         next(error);

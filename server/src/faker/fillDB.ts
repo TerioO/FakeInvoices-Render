@@ -9,9 +9,9 @@ const N_invoices = appConfig.random_invoices_to_generate;
 const fillDB = async () => {
     try {
         await mongoose.connect(env.MONGO_URI_DEV, { dbName: env.MONGO_DB_DEV });
-        await createFakeUsers(15, N_invoices);
-        await createFakeUsers(15, N_invoices, ROLES.reader);
-        // await createFakeUsers(1, N_invoices, ROLES.owner);
+        await createFakeUsers(10, N_invoices);
+        await createFakeUsers(10, N_invoices, ROLES.reader);
+        await createFakeUsers(1, N_invoices, ROLES.owner);
         mongoose.disconnect();
     }
     catch(error){

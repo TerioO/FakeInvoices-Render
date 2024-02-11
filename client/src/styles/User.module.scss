@@ -13,7 +13,7 @@ div.Profile {
         }
     }
 
-    > button {
+    >button {
         margin: 1rem 0;
     }
 
@@ -44,14 +44,19 @@ div.ProfileModal {
     transform: translate(-50%, -50%);
     padding: 1rem;
     border-radius: .25rem;
-    @media (width <= $br-small){
+
+    @media (width <=$br-small) {
         width: 90%;
+    }
+
+    >p {
+        word-wrap: break-word;
     }
 }
 
 div.UsersList {
     >h1 {
-        margin: 3rem 0;
+        margin: 3rem 0 1rem 0;
         text-align: center;
 
         @media (width <=$br-small) {
@@ -74,14 +79,142 @@ div.UsersList {
         }
 
     }
-    
+
     div.OpenUserInvoices {
         margin-top: 1rem;
+
+        >button {
+            display: block;
+
+            &+button {
+                margin-top: .5rem;
+            }
+        }
     }
 
     div.UsersPagination {
         display: flex;
         justify-content: center;
         margin: 1rem 0 1.5rem 0;
+    }
+
+    div.SearchUser {
+        margin: 1rem 0 3rem 0;
+
+        @media (width <=$br-small) {
+            margin-bottom: 1.5rem;
+        }
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        >form {
+            @media (width <=$br-small) {
+                display: flex;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            >button {
+                margin-left: 1rem;
+                width: 150px;
+            }
+
+            >* {
+                margin: .25rem 0;
+            }
+        }
+    }
+}
+
+div.AccountSettings {
+    >h1 {
+        margin: 3rem 0;
+        text-align: center;
+    }
+
+    >section {
+        >h2 {
+            margin-bottom: 4px;
+        }
+    }
+
+    form.ChangePass {
+        margin-top: 1.5rem;
+
+        >div {
+            display: flex;
+            flex-direction: column;
+            max-width: 250px;
+
+
+            >button {
+                margin: 1rem 0;
+            }
+        }
+    }
+}
+
+div.UpdateUserModal {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    border-radius: .25rem;
+    padding: 0 .5rem .5rem .5rem;
+    width: 70rem;
+    margin: 0 auto;
+
+    @media(width <=72rem) {
+        width: 90vw;
+    }
+
+    >span {
+        display: flex;
+        justify-content: flex-end;
+        padding: .5rem 0;
+    }
+
+    >form {
+        padding: .5rem;
+
+        p {
+            margin: 0;
+        }
+
+        .userData,
+        .inputs {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            column-gap: 1rem;
+            row-gap: 1rem;
+            align-items: center;
+        }
+
+        .userData {
+            margin-bottom: 1.5rem;
+        }
+
+        .inputs {
+            margin-top: 1.5rem;
+
+            >input,
+            >select {
+                padding: 4px;
+                outline: 0;
+                border: 1px solid black;
+                border-radius: .25rem;
+            }
+        }
+
+        >button {
+            margin-top: 1rem;
+        }
+
+        :global(.errorTRUE) {
+            margin: 1rem 0;
+        }
     }
 }

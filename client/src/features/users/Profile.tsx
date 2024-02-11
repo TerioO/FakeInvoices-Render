@@ -24,6 +24,8 @@ export default function Profile() {
                     <p>{user.country}</p>
                     <p>Phone: </p>
                     <p>{user.phone}</p>
+                    <p>Email:</p>
+                    <p>{user.email}</p>
                     <p>User roles: </p>
                     <p>{user.role}</p>
                     <p>Created </p>
@@ -42,7 +44,7 @@ export default function Profile() {
             <Button onClick={() => setModalOpen(true)}>Read my db entry</Button>
             <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
                 <div className={s.ProfileModal}>
-                    {JSON.stringify(data?.profile, null, 2)}
+                    <p>{JSON.stringify(data?.profile, null, 2)}</p>
                 </div>
             </Modal>
         </div>

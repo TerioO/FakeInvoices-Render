@@ -10,7 +10,7 @@ export const store = configureStore({
         auth: authReducer,
         globalSnackbar: globalSnackbarReducer
     },
-    devTools: true,
+    devTools: import.meta.env.DEV,
     // Adding the api middleware enables caching, invalidation, polling,
     // and other useful features of `rtk-query`.
     middleware: (getDefaultMiddleware) =>

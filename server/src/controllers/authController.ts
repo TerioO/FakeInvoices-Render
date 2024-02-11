@@ -5,7 +5,7 @@ import env from "../config/env";
 import bcrypt from "bcrypt";
 import User, { UserCreateInterface } from "../models/User";
 import { COUNTRIES } from "../constants/countries";
-import { PASSWORD_REGEX, NAME_REGEX, EMAIL_REGEX } from "../constants/regex";
+import { PASSWORD_REGEX, NAME_REGEX, EMAIL_REGEX, PHONE_REGEX } from "../constants/regex";
 import { createFakeInvoicesReq } from "../faker/createFakeInvoices";
 import { appConfig } from "../config/appConfig";
 import { AccessTokenPayload, createAccessToken, createRefreshToken } from "./helpers/createTokens";
@@ -22,6 +22,7 @@ export const register = async (req: Request<unknown, unknown, UserCreateInterfac
         if (!PASSWORD_REGEX.test(password)) throw createHttpError(400, "Password not strong enough");
         if (!EMAIL_REGEX.test(email)) throw createHttpError(400, "Invalid email format");
         if (!validateEmail(email)) throw createHttpError(400, "Invalid email provider, check allowed list");
+        if (!PHONE_REGEX.test(phone)) throw createHttpError(400, "Invalid phone number");
 
         // Duplicate check:
         const duplicate = await User.findOne({ email }).lean().exec();
@@ -135,7 +136,6 @@ export const refresh: RequestHandler = async (req, res, next) => {
 
 export const logout: RequestHandler = async (req, res, next) => {
     const cookies = req.cookies;
-    console.log(cookies);
     if (!cookies?.jwt) return res.status(200).json({ message: "Already logged out" });
     try {
         res.clearCookie("jwt", {

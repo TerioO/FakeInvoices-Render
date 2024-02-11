@@ -11,5 +11,6 @@ router.get("/all", handlers.getAllInvoices);
 router.get("/users-invoices", handlers.getUsersInvoices);
 router.get("/my-invoices", handlers.getMyInvoices);
 router.get("/invoice-pdf", handlers.getInvoicePDF);
+router.get("/invoice-pdf-email", handlers.getInvoicePDFtoEmail);
 
 export default router;

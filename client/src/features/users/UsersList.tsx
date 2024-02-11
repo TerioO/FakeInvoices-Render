@@ -1,7 +1,8 @@
 import s from "../../styles/User.module.scss";
 import React, { useEffect, useState } from "react";
-import { useLazyGetUsersQuery } from "./usersApiSlice";
+import { useLazyGetUsersQuery, UsersI } from "./usersApiSlice";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
 import CircularProgressCenter from "../../components/utils/CircularProgressCenter";
 import CustomSnackbar from "../../components/utils/CustomSnackbar";
 import {
@@ -13,6 +14,8 @@ import {
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import dayjs from "dayjs";
+import UpdateUserModal from "./UpdateUserModal";
+import SearchUser from "./SearchUser";
 
 const limit = 10;
 
@@ -20,7 +23,10 @@ export default function UsersList() {
     const navigate = useNavigate();
     const [getUsers, { isFetching, data, error, isSuccess }] =
         useLazyGetUsersQuery();
+    const { role } = useAuth();
     const [page, setPage] = useState<number>(1);
+    const [openModal, setOpenModal] = useState<boolean>(false);
+    const [userModal, setUserModal] = useState<UsersI | undefined>(undefined);
 
     useEffect(() => {
         if (!isFetching) getUsers({ limit, page }, true);
@@ -45,7 +51,7 @@ export default function UsersList() {
             <Accordion key={user._id}>
                 <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                     <h3>
-                        {user.firstName} {user.lastName}
+                        {user.lastName} {user.firstName}
                     </h3>
                 </AccordionSummary>
                 <AccordionDetails>
@@ -72,6 +78,17 @@ export default function UsersList() {
                         >
                             Open user invoices
                         </Button>
+                        {role === "OWNER" && (
+                            <Button
+                                variant="outlined"
+                                onClick={() => {
+                                    setUserModal(user);
+                                    setOpenModal(true);
+                                }}
+                            >
+                                Edit User
+                            </Button>
+                        )}
                     </div>
                 </AccordionDetails>
             </Accordion>
@@ -83,6 +100,7 @@ export default function UsersList() {
             <CustomSnackbar message={error} />
             {isFetching && <CircularProgressCenter />}
             <h1>Users list</h1>
+            <SearchUser />
             <div className={s.UsersPagination}>
                 <Pagination
                     size="small"
@@ -93,6 +111,11 @@ export default function UsersList() {
                 />
             </div>
             <div>{!isFetching && content}</div>
+            <UpdateUserModal
+                open={openModal}
+                setOpen={setOpenModal}
+                user={userModal}
+            />
         </div>
     );
 }

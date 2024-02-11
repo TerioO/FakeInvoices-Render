@@ -1,0 +1,174 @@
+@import "./ct.scss";
+
+div.Requests {
+    >h1 {
+        text-align: center;
+        margin-top: 3rem;
+    }
+
+    >div.OwnerReqVersion,
+    >div.UserRerVersion {
+        div.RequestsContainer {
+            display: flex;
+            justify-content: space-evenly;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        form.fetchMoreRequests {
+            display: flex;
+            justify-content: center;
+            margin: 1rem 0;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin: 2rem 0 1rem 0;
+        }
+
+        div.controls {
+            display: flex;
+            align-items: center;
+
+            .selFulfilled {
+                min-width: 120px;
+                margin-left: auto;
+            }
+
+            .selSort {
+                min-width: 130px;
+                margin-left: 1rem;
+            }
+        }
+
+        .RequestCard {
+            display: flex;
+            flex-direction: column;
+            width: 400px;
+            margin: 1rem .5rem;
+            padding: .5rem;
+
+            @media (width <=$br-small) {
+                margin: .5rem 0;
+                max-width: auto;
+            }
+
+            >div.title {
+                display: flex;
+                align-items: center;
+
+                >p {
+
+                    >span {
+                        @media(width <=$br-small) {
+                            display: none;
+                        }
+                    }
+                }
+
+                >span {
+                    margin-left: auto;
+                }
+            }
+
+            p.message {
+                word-wrap: break-word;
+                margin-bottom: 1.5rem;
+            }
+
+            div.date {
+                display: flex;
+                align-items: center;
+                margin-top: auto;
+
+                >p {
+                    &:first-of-type {
+                        margin-top: auto;
+                        margin-bottom: 0;
+                    }
+
+                    &:last-of-type {
+                        margin: 0 0 0 auto;
+                    }
+                }
+
+                .pending {
+                    color: gray;
+                }
+
+                .fulfilled {
+                    color: rgb(3, 196, 3);
+                }
+
+                .rejected {
+                    color: red;
+                }
+            }
+        }
+    }
+
+    >div.UserRerVersion {
+        p.info-title {
+            text-align: center;
+        }
+
+        div.controls {
+            .selSort {
+                min-width: 130px;
+                margin-left: auto;
+            }
+        }
+
+        >form {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 2rem 0;
+
+            @media (width <=$br-small) {
+                flex-direction: column;
+            }
+
+            >div {
+                width: 400px;
+
+                @media (width <=$br-small) {
+                    width: 84vw;
+                }
+            }
+
+            >button {
+                margin-left: 1rem;
+
+                @media (width <=$br-small) {
+                    margin-top: 1rem;
+                    margin-left: 0;
+                }
+            }
+        }
+    }
+}
+
+div.updateModal {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    border-radius: .25rem;
+
+    >form {
+        display: flex;
+        padding: 1rem;
+
+        >select {
+            padding: 4px;
+            outline: 0;
+            border: 1px solid black;
+            border-radius: .25rem;
+            margin-right: 1rem;
+            cursor: pointer;
+        }
+    }
+}

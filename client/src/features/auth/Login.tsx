@@ -1,9 +1,15 @@
 import s from "../../styles/Auth.module.scss";
 import React, { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { useLoginMutation, LoginPayload } from "./authApiSlice";
+import { useLoginMutation } from "./authApiSlice";
 import { useGetErrorMessage } from "../../hooks/useGetErrorMessage";
-import { setPersistLogin, selectPersistLogin } from "./authSlice";
+import {
+    setPersistLogin,
+    selectPersistLogin,
+    selectRegisterForm,
+    resetRegisterForm,
+    setRegisterForm,
+} from "./authSlice";
 import PasswordInput from "../../components/utils/PasswordInput";
 import TextInput from "../../components/utils/TextInput";
 import {
@@ -17,17 +23,12 @@ import {
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import CloseIcon from "@mui/icons-material/Close";
 
-const initialLoginState: LoginPayload = {
-    email: "",
-    password: "",
-};
-
 export default function Login() {
     const navigate = useNavigate();
-    const [form, setForm] = useState<LoginPayload>(initialLoginState);
-    const [open, setOpen] = useState<boolean>(false);
-    const persistLogin = useAppSelector(selectPersistLogin);
     const dispatch = useAppDispatch();
+    const persistLogin = useAppSelector(selectPersistLogin);
+    const form = useAppSelector(selectRegisterForm);
+    const [open, setOpen] = useState<boolean>(false);
     const [login, { isLoading, error }] = useLoginMutation();
 
     const errorMsg = useGetErrorMessage(error, form);
@@ -36,7 +37,7 @@ export default function Login() {
         e.preventDefault();
         try {
             await login(form).unwrap();
-            setForm(initialLoginState);
+            dispatch(resetRegisterForm({ keepLoginData: false }));
             navigate("/");
         } catch (error) {
             /* */
@@ -53,19 +54,23 @@ export default function Login() {
                     required={true}
                     value={form.email}
                     onChange={(e) =>
-                        setForm((prev) => ({
-                            ...prev,
-                            email: e.target.value,
-                        }))
+                        dispatch(
+                            setRegisterForm({
+                                value: e.target.value,
+                                property: "email",
+                            })
+                        )
                     }
                 />
                 <PasswordInput
                     value={form.password}
                     onChange={(e) =>
-                        setForm((prev) => ({
-                            ...prev,
-                            password: e.target.value,
-                        }))
+                        dispatch(
+                            setRegisterForm({
+                                value: e.target.value,
+                                property: "password",
+                            })
+                        )
                     }
                 />
                 <FormControlLabel
@@ -81,7 +86,8 @@ export default function Login() {
                         />
                     }
                 />
-                <p>{errorMsg}</p>
+                <p className={s.rememberMeInfo}>Check this, otherwise login session is lost on every new tab/reload</p>
+                <p className="errorTRUE">{errorMsg}</p>
                 <Button disabled={isLoading} variant="contained" type="submit">
                     LOG IN
                 </Button>
